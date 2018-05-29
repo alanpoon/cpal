@@ -122,6 +122,8 @@ extern crate lazy_static;
 #[cfg(target_os = "emscripten")]
 #[macro_use]
 extern crate stdweb;
+extern crate opensles;
+#[path = "opensles/mod.rs"]
 
 pub use samples_formats::{Sample, SampleFormat};
 
