@@ -10,8 +10,37 @@ use FormatsEnumerationError;
 use StreamData;
 use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
-pub struct EventLoop(SLObjectItf);
-
+pub struct EventLoop{
+    active_callbacks: Arc<ActiveCallbacks>,
+    streams: Mutex<Vec<Option<StreamInner>>>,
+};
+struct ActiveCallbacks {
+    // Whenever the `run()` method is called with a callback, this callback is put in this list.
+    callbacks: Mutex<Vec<&'static mut (FnMut(StreamId, StreamData) + Send)>>,
+}
+use opensles::bindings::{SLAndroidSimpleBufferQueueItf}
+extern "C" fn c_render_callback(queue: SLAndroidSimpleBufferQueueItf, void_context: *mut std::os::raw::c_void) {
+ let closure = *void_context.closure;
+}
+extern "C" fn c_record_callback(queue: SLAndroidSimpleBufferQueueItf, void_context: *mut std::os::raw::c_void) {
+   OPENSL_STREAM *p = (OPENSL_STREAM *) context;
+  if (p->outputChannels) {
+    if (p->inputIntervals < STARTUP_INTERVALS) {
+      updateIntervals(&p->inputTime, p->thresholdMillis, &p->inputIntervals,
+          &p->inputOffset, &p->previousInputIndex, p->inputIndex);
+    }
+  } else {
+    p->callback(p->context, p->sampleRate, p->callbackBufferFrames,
+        p->inputChannels, p->inputBuffer +
+        (p->inputIndex % p->inputBufferFrames) * p->inputChannels,
+        0, NULL);
+  }
+  __sync_bool_compare_and_swap(&p->inputIndex, p->inputIndex,
+      nextIndex(p->inputIndex, p->callbackBufferFrames));
+  (*bq)->Enqueue(bq, p->inputBuffer +
+      (p->inputIndex % p->inputBufferFrames) * p->inputChannels,
+      p->callbackBufferFrames * p->inputChannels * sizeof(short));
+}
 impl EventLoop {
     #[inline]
     pub fn new() -> EventLoop {
@@ -26,21 +55,92 @@ impl EventLoop {
         let engineMixIIDs = SL_IID_ENGINE;
         let mut result = slCreateEngine(self.0,0,None,1,true);
         let bu = SLBufferQueueItf_();
-        let bqPlayerBufferQueue;
-        result = bu.RegisterCallback(bqPlayerBufferQueue,Some())
+
+        let callback: &mut (FnMut(StreamId, StreamData) + Send) = &mut callback;
+        self.active_callbacks
+            .callbacks
+            .lock()
+            .unwrap()
+            .push(unsafe { mem::transmute(callback) });
+
+        loop {
+            // So the loop does not get optimised out in --release
+            thread::sleep(Duration::new(1u64, 0u32));
+        }
     }
 
     #[inline]
-    pub fn build_input_stream(&self, _: &Device, _: &Format) -> Result<StreamId, CreationError> {
-        
+    pub fn build_input_stream(&self, device: &Device, _: &Format) -> Result<StreamId, CreationError> {
+        if (self.inputChannels < 0 || self.inputChannels > 2) {
+            return Err(CreationError::DeviceNotAvailable);
+        }
+        let loc_dev:SLDataLocator_IODevice_ = SLDataLocator_IODevice_{
+            locatorType:SL_DATALOCATOR_IODEVICE,
+            deviceType:SL_IODEVICE_AUDIOINPUT,
+            deviceID:SL_DEFAULTDEVICEID_AUDIOINPUT,
+            device:None
+        };
+        let audioSrc:SLDataSource_ = SLDataSource_{
+            pLocator:&loc_dev, 
+            pFormat:None};  // source: microphone
+
+        let mut mics=0;
+        if (self.inputChannels > 1) {
+            // Yes, we're using speaker macros for mic config.  It's okay, really.
+            mics = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
+        } else {
+            mics = SL_SPEAKER_FRONT_CENTER;
+        }
+        let loc_bq =SLDataLocator_AndroidSimpleBufferQueue{
+            locatorType:SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
+            numBuffers:1
+        };
+        let format_pcm = SLDataFormat_PCM{
+            formatType:SL_DATAFORMAT_PCM,
+            numChannels:self.inputChannels,
+            samplesPerSec:sr,
+            bitsPerSample:SL_PCMSAMPLEFORMAT_FIXED_16,
+            containerSize:SL_PCMSAMPLEFORMAT_FIXED_16,
+            channelMask:mics,
+            endianness:SL_BYTEORDER_LITTLEENDIAN
+        };
+
+        let audioSnk = SLDataSink{&loc_bq, &format_pcm};  // sink: buffer queue
+
+        // create audio recorder (requires the RECORD_AUDIO permission)
+        let id = SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+        let req = SL_BOOLEAN_TRUE;
+
+        let mut result = self.engineEngine.CreateAudioRecorder(
+            self.engineEngine, &self.recorderObject, &audioSrc, &audioSnk, 1, id, req);
+        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+
+        let result = self.recorderObject.Realize(self.recorderObject, SL_BOOLEAN_FALSE);
+        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+
+        let result = self.recorderObject.GetInterface(self.recorderObject,
+            SL_IID_RECORD, &p->recorderRecord);
+        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+
+        result = self.recorderObject.GetInterface(
+            self.recorderObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
+            &self.recorderBufferQueue);
+        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+
+        result = self.recorderBufferQueue.RegisterCallback(
+            self.recorderBufferQueue, c_record_callback, self);
+        let stream_id = self.next_stream_id();
+        let active_callbacks = self.active_callbacks.clone();
+        Ok(StreamId(stream_id))
     }
 
     #[inline]
     pub fn build_output_stream(&self, device: &Device, format: &Format) -> Result<StreamId, CreationError> {
+        
         unsafe{
-            let mut playback_handle = mem::uninitialized();
             let bu = SLBufferQueueItf_();
-            let res = match bu.RegisterCallback(bqPlayerBufferQueue,playback_handle).unwrap(){
+            let active_callbacks = self.active_callbacks.clone();
+            let res = match bu.RegisterCallback.unwrap()(bu,Some(c_render_callback),content as *mut _ as *mut std::os::raw::c_void).unwrap(){
                 SLresult::Success=>{
                     let new_stream_id = StreamId(self.next_stream_id.fetch_add(1, Ordering::Relaxed));
                     assert_ne!(new_stream_id.0, usize::max_value()); // check for overflows

@@ -5,6 +5,7 @@ SL_PCMSAMPLEFORMAT_FIXED_16,SL_PCMSAMPLEFORMAT_FIXED_16,SL_SPEAKER_FRONT_CENTER,
 use opensles::bindings::{SLInterfaceID,SLboolean,SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND}
 use opensles::bindings::{SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE}
 use opensles::bindings::{SL_RESULT_SUCCESS}
+
 pub struct Devices{
     object:Option<SLObjectItf>,
     ids: SLInterfaceID,
