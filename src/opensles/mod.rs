@@ -10,10 +10,23 @@ use FormatsEnumerationError;
 use StreamData;
 use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
+
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
 };
+fn nextIndex(index:i32, increment:i32)->i32 {
+  // Handle potential integer overflow.
+  return (std::i32::MAX - index >= increment) ? index + increment : 0;
+}
+pub struct OPENSL_STREAM {
+    callback: Box<FnMut(StreamId, StreamData) + Send)>,
+    sample_rate:i32,
+    input_channels: i32,
+    output_channels:i32,
+    callback_buffer_size:i32,
+    
+}
 struct ActiveCallbacks {
     // Whenever the `run()` method is called with a callback, this callback is put in this list.
     callbacks: Mutex<Vec<&'static mut (FnMut(StreamId, StreamData) + Send)>>,
@@ -22,8 +35,9 @@ use opensles::bindings::{SLAndroidSimpleBufferQueueItf}
 extern "C" fn c_render_callback(queue: SLAndroidSimpleBufferQueueItf, void_context: *mut std::os::raw::c_void) {
  let closure = *void_context.closure;
 }
-extern "C" fn c_record_callback(queue: SLAndroidSimpleBufferQueueItf, void_context: *mut std::os::raw::c_void) {
-   OPENSL_STREAM *p = (OPENSL_STREAM *) context;
+extern "C" fn c_record_callback(bq: SLAndroidSimpleBufferQueueItf, context: *mut std::os::raw::c_void) {
+  int STARTUP_INTERVALS=8;
+  OPENSL_STREAM *p = (OPENSL_STREAM *) context;
   if (p->outputChannels) {
     if (p->inputIntervals < STARTUP_INTERVALS) {
       updateIntervals(&p->inputTime, p->thresholdMillis, &p->inputIntervals,
@@ -40,6 +54,7 @@ extern "C" fn c_record_callback(queue: SLAndroidSimpleBufferQueueItf, void_conte
   (*bq)->Enqueue(bq, p->inputBuffer +
       (p->inputIndex % p->inputBufferFrames) * p->inputChannels,
       p->callbackBufferFrames * p->inputChannels * sizeof(short));
+      p->callback(&p.streamid,&p.streamdata);
 }
 impl EventLoop {
     #[inline]
@@ -122,12 +137,12 @@ impl EventLoop {
             SL_IID_RECORD, &p->recorderRecord);
         if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
 
-        result = self.recorderObject.GetInterface(
+        let result = self.recorderObject.GetInterface(
             self.recorderObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
             &self.recorderBufferQueue);
         if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
 
-        result = self.recorderBufferQueue.RegisterCallback(
+        let result = self.recorderBufferQueue.RegisterCallback(
             self.recorderBufferQueue, c_record_callback, self);
         let stream_id = self.next_stream_id();
         let active_callbacks = self.active_callbacks.clone();

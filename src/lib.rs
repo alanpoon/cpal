@@ -122,13 +122,15 @@ extern crate lazy_static;
 #[cfg(target_os = "emscripten")]
 #[macro_use]
 extern crate stdweb;
+
+#[cfg(target_os = "android")]
 extern crate opensles;
-#[path = "opensles/mod.rs"]
+
 
 pub use samples_formats::{Sample, SampleFormat};
 
 #[cfg(not(any(windows, target_os = "linux", target_os = "freebsd",
-              target_os = "macos", target_os = "ios", target_os = "emscripten")))]
+              target_os = "macos", target_os = "ios", target_os = "emscripten",target_os = "android")))]
 use null as cpal_impl;
 
 use std::error::Error;
@@ -154,6 +156,10 @@ mod cpal_impl;
 #[cfg(target_os = "emscripten")]
 #[path = "emscripten/mod.rs"]
 mod cpal_impl;
+
+#[cfg(target_os = "android")]
+#[path = "opensles/mod.rs"]
+mod cpal_imp;
 
 /// An opaque type that identifies a device that is capable of either audio input or output.
 ///
