@@ -7,6 +7,7 @@ jobs:
     docker:
       - image: tomaka/cargo-apk
     steps:
+      - run: apt-get install --reinstall python-software-properties
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
       - run: apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
       - run: apt-get -qq update && apt-get install -y git
