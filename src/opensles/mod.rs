@@ -14,7 +14,7 @@ use std::{cmp, ffi, iter, mem, ptr};
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
-};
+}
 fn nextIndex(index:i32, increment:i32)->i32 {
   // Handle potential integer overflow.
   return (std::i32::MAX - index >= increment) ? index + increment : 0;
