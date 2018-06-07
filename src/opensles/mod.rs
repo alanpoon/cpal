@@ -20,7 +20,7 @@ fn nextIndex(index:i32, increment:i32)->i32 {
   return (std::i32::MAX - index >= increment) ? index + increment : 0;
 }
 pub struct OPENSL_STREAM {
-    callback: Box<FnMut(StreamId, StreamData) + Send)>,
+    callback: Box<FnMut(StreamId, StreamData) + Send>,
     sample_rate:i32,
     input_channels: i32,
     output_channels:i32,
