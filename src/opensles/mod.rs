@@ -10,14 +10,14 @@ use FormatsEnumerationError;
 use StreamData;
 use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
-
+use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
 }
 fn nextIndex(index:i32, increment:i32)->i32 {
   // Handle potential integer overflow.
-  return (std::i32::MAX - index >= increment) ? index + increment : 0;
+  return (std::i32::MAX - index >= increment) ? index + increment; : 0;
 }
 pub struct OPENSL_STREAM {
     callback: Box<FnMut(StreamId, StreamData) + Send>,
@@ -31,7 +31,7 @@ struct ActiveCallbacks {
     // Whenever the `run()` method is called with a callback, this callback is put in this list.
     callbacks: Mutex<Vec<&'static mut (FnMut(StreamId, StreamData) + Send)>>,
 }
-use opensles::bindings::{SLAndroidSimpleBufferQueueItf}
+
 extern "C" fn c_render_callback(queue: SLAndroidSimpleBufferQueueItf, void_context: *mut std::os::raw::c_void) {
  let closure = *void_context.closure;
 }
