@@ -1,10 +1,10 @@
 use super::Device;
-use opensles::bindings::{SLDataLocator_AndroidSimpleBufferQueue,SLDataFormat_PCM}
+use opensles::bindings::{SLDataLocator_AndroidSimpleBufferQueue,SLDataFormat_PCM};
 use opensles::bindings::{SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,SL_DATAFORMAT_PCM,SL_SAMPLINGRATE_8,
-SL_PCMSAMPLEFORMAT_FIXED_16,SL_PCMSAMPLEFORMAT_FIXED_16,SL_SPEAKER_FRONT_CENTER,SL_BYTEORDER_LITTLEENDIAN}
-use opensles::bindings::{SLInterfaceID,SLboolean,SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND}
-use opensles::bindings::{SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE}
-use opensles::bindings::{SL_RESULT_SUCCESS}
+SL_PCMSAMPLEFORMAT_FIXED_16,SL_PCMSAMPLEFORMAT_FIXED_16,SL_SPEAKER_FRONT_CENTER,SL_BYTEORDER_LITTLEENDIAN};
+use opensles::bindings::{SLInterfaceID,SLboolean,SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND};
+use opensles::bindings::{SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+use opensles::bindings::{SL_RESULT_SUCCESS};
 
 pub struct Devices{
     object:Option<SLObjectItf>,
