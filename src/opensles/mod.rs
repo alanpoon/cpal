@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-
+extern crate libc;
 use std::marker::PhantomData;
 use opensles;
 use opensles::bindings::*;
@@ -11,6 +11,8 @@ use StreamData;
 use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
 use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
+use libc::{c_int};
+
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
@@ -36,7 +38,7 @@ extern "C" fn c_render_callback(queue: SLAndroidSimpleBufferQueueItf, void_conte
  let closure = *void_context.closure;
 }
 extern "C" fn c_record_callback(bq: SLAndroidSimpleBufferQueueItf, context: *mut std::os::raw::c_void) {
-  int STARTUP_INTERVALS=8;
+  c_int STARTUP_INTERVALS=8;
   OPENSL_STREAM *p = (OPENSL_STREAM *) context;
   if (p->outputChannels) {
     if (p->inputIntervals < STARTUP_INTERVALS) {
