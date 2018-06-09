@@ -12,6 +12,7 @@ use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
 use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
 use libc::{c_int};
+use std::sync::{Arc,Mutex};
 
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
@@ -61,17 +62,18 @@ extern "C" fn c_record_callback(bq: SLAndroidSimpleBufferQueueItf, context: *mut
 impl EventLoop {
     #[inline]
     pub fn new() -> EventLoop {
-        let o = SLObjectItf();
-        EventLoop(o)
+        EventLoop {
+            active_callbacks: Arc::new(ActiveCallbacks { callbacks: Mutex::new(Vec::new()) }),
+            streams: Mutex::new(Vec::new()),
+        }
     }
 
     #[inline]
-    pub fn run<F>(&mut self, _callback: F) -> !
-        where F: FnMut(StreamId, StreamData)
+    pub fn run<F>(&mut self, callback: F) -> !
+        where F: FnMut(StreamId, StreamData) + Send
     {
         let engineMixIIDs = SL_IID_ENGINE;
         let mut result = slCreateEngine(self.0,0,None,1,true);
-        let bu = SLBufferQueueItf_();
 
         let callback: &mut (FnMut(StreamId, StreamData) + Send) = &mut callback;
         self.active_callbacks
