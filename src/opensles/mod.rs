@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 extern crate libc;
 use std::marker::PhantomData;
-use opensles;
 use opensles::bindings::*;
 use CreationError;
 use DefaultFormatError;
@@ -13,7 +12,8 @@ use std::{cmp, ffi, iter, mem, ptr};
 use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
 use libc::{c_int};
 use std::sync::{Arc,Mutex};
-
+use std::thread;
+use std::time::Duration;
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
