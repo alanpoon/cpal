@@ -73,7 +73,7 @@ impl EventLoop {
         where F: FnMut(StreamId, StreamData) + Send
     {
         let engineMixIIDs = SL_IID_ENGINE;
-        let mut result = slCreateEngine(self.0,0,None,1,true);
+        let mut result = slCreateEngine(engineMixIIDs,0,None,1,true);
 
         let callback: &mut (FnMut(StreamId, StreamData) + Send) = &mut callback;
         self.active_callbacks
