@@ -94,7 +94,7 @@ impl EventLoop {
             return Err(CreationError::DeviceNotAvailable);
         }
         let loc_dev:SLDataLocator_IODevice_ = SLDataLocator_IODevice_{
-            locatorType:SL_DATALOCATOR_IODEVICE,
+            locatorType:SL_IID_3DLOCATION,
             deviceType:SL_IODEVICE_AUDIOINPUT,
             deviceID:SL_DEFAULTDEVICEID_AUDIOINPUT,
             device:None
@@ -110,18 +110,15 @@ impl EventLoop {
         } else {
             mics = SL_SPEAKER_FRONT_CENTER;
         }
-        let loc_bq =SLDataLocator_AndroidSimpleBufferQueue{
-            locatorType:SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,
-            numBuffers:1
-        };
+        let loc_bq =SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
         let format_pcm = SLDataFormat_PCM{
             formatType:SL_DATAFORMAT_PCM,
             numChannels:self.inputChannels,
             samplesPerSec:sr,
-            bitsPerSample:SL_PCMSAMPLEFORMAT_FIXED_16,
-            containerSize:SL_PCMSAMPLEFORMAT_FIXED_16,
+            bitsPerSample:ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE,
+            containerSize:ANDROID_KEY_PCMFORMAT_CONTAINERSIZE,
             channelMask:mics,
-            endianness:SL_BYTEORDER_LITTLEENDIAN
+            endianness:ANDROID_KEY_PCMFORMAT_ENDIANNESS
         };
 
         let audioSnk = SLDataSink{&loc_bq, &format_pcm};  // sink: buffer queue
