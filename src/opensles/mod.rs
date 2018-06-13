@@ -10,10 +10,15 @@ use StreamData;
 use SupportedFormat;
 use std::{cmp, ffi, iter, mem, ptr};
 use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
+
 use libc::{c_int};
 use std::sync::{Arc,Mutex};
 use std::thread;
 use std::time::Duration;
+use std;
+mod enumerate;
+mod macrobinds;
+use macrobinds::*;
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
@@ -94,7 +99,7 @@ impl EventLoop {
             return Err(CreationError::DeviceNotAvailable);
         }
         let loc_dev:SLDataLocator_IODevice_ = SLDataLocator_IODevice_{
-            locatorType:SL_IID_3DLOCATION,
+            locatorType:SL_DATALOCATOR_IODEVICE,
             deviceType:SL_IODEVICE_AUDIOINPUT,
             deviceID:SL_DEFAULTDEVICEID_AUDIOINPUT,
             device:None
@@ -111,10 +116,11 @@ impl EventLoop {
             mics = SL_SPEAKER_FRONT_CENTER;
         }
         let loc_bq =SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+        let sr:SLuint32 = 22050;
         let format_pcm = SLDataFormat_PCM{
             formatType:SL_DATAFORMAT_PCM,
             numChannels:self.inputChannels,
-            samplesPerSec:sr,
+            samplesPerSec:convertSampleRate(sr),
             bitsPerSample:ANDROID_KEY_PCMFORMAT_BITSPERSAMPLE,
             containerSize:ANDROID_KEY_PCMFORMAT_CONTAINERSIZE,
             channelMask:mics,
@@ -129,19 +135,19 @@ impl EventLoop {
 
         let mut result = self.engineEngine.CreateAudioRecorder(
             self.engineEngine, &self.recorderObject, &audioSrc, &audioSnk, 1, id, req);
-        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+        if SL_RESULT_SUCCESS != result {return Err(CreationError::DeviceNotAvailable);}
 
         let result = self.recorderObject.Realize(self.recorderObject, SL_BOOLEAN_FALSE);
-        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+        if SL_RESULT_SUCCESS != result {return Err(CreationError::DeviceNotAvailable);}
 
         let result = self.recorderObject.GetInterface(self.recorderObject,
             SL_IID_RECORD, &p->recorderRecord);
-        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+        if SL_RESULT_SUCCESS != result { return Err(CreationError::DeviceNotAvailable);}
 
         let result = self.recorderObject.GetInterface(
             self.recorderObject, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
             &self.recorderBufferQueue);
-        if (SL_RESULT_SUCCESS != result) return Err(CreationError::DeviceNotAvailable);
+        if SL_RESULT_SUCCESS != result { return Err(CreationError::DeviceNotAvailable);}
 
         let result = self.recorderBufferQueue.RegisterCallback(
             self.recorderBufferQueue, c_record_callback, self);
@@ -339,5 +345,23 @@ impl<'a, T> OutputBuffer<'a, T> {
 
     #[inline]
     pub fn finish(self) {
+    }
+}
+ 
+fn convertSampleRate(SLuint32 sr){
+    match sr{
+        8000=>SL_SAMPLINGRATE_8,
+        11025=>SL_SAMPLINGRATE_11_025,
+        12000=>SL_SAMPLINGRATE_12,
+        16000=>SL_SAMPLINGRATE_16,
+        22050=>SL_SAMPLINGRATE_22_05,
+        24000=>SL_SAMPLINGRATE_24,
+        32000=>SL_SAMPLINGRATE_32,
+        44100=>SL_SAMPLINGRATE_44_1,
+        48000=>SL_SAMPLINGRATE_48,
+        64000=>SL_SAMPLINGRATE_64,
+        88200=>SL_SAMPLINGRATE_88_2,
+        96000=>SL_SAMPLINGRATE_96,
+        192000=>SL_SAMPLINGRATE_192
     }
 }
