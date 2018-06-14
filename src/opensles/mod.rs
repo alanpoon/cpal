@@ -160,7 +160,12 @@ impl EventLoop {
     pub fn build_output_stream(&self, device: &Device, format: &Format) -> Result<StreamId, CreationError> {
         
         unsafe{
-            let bu = SLBufferQueueItf_();
+            let bu = SLBufferQueueItf_{
+                Enqueue:None,
+                Clear:None,
+                GetState:None,
+                RegisterCallback
+            };
             let active_callbacks = self.active_callbacks.clone();
             let res = match bu.RegisterCallback.unwrap()(bu,Some(c_render_callback),content as *mut _ as *mut std::os::raw::c_void).unwrap(){
                 SLresult::Success=>{
