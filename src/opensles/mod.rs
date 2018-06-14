@@ -8,7 +8,6 @@ use Format;
 use FormatsEnumerationError;
 use StreamData;
 use SupportedFormat;
-use std::{cmp, ffi, iter, mem, ptr};
 use opensles::bindings::{SLAndroidSimpleBufferQueueItf};
 
 use libc::{c_int};
@@ -17,8 +16,9 @@ use std::thread;
 use std::time::Duration;
 use std;
 mod enumerate;
-mod macrobinds;
-use macrobinds::*;
+use super::macrobinds::*;
+use sampleformat::SampleFormat;
+
 pub struct EventLoop{
     active_callbacks: Arc<ActiveCallbacks>,
     streams: Mutex<Vec<Option<StreamInner>>>,
@@ -95,7 +95,7 @@ impl EventLoop {
 
     #[inline]
     pub fn build_input_stream(&self, device: &Device, _: &Format) -> Result<StreamId, CreationError> {
-        if (self.inputChannels < 0 || self.inputChannels > 2) {
+        if self.inputChannels < 0 || self.inputChannels > 2 {
             return Err(CreationError::DeviceNotAvailable);
         }
         let loc_dev:SLDataLocator_IODevice_ = SLDataLocator_IODevice_{
@@ -109,7 +109,7 @@ impl EventLoop {
             pFormat:None};  // source: microphone
 
         let mut mics=0;
-        if (self.inputChannels > 1) {
+        if self.inputChannels > 1 {
             // Yes, we're using speaker macros for mic config.  It's okay, really.
             mics = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
         } else {
