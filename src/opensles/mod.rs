@@ -166,6 +166,7 @@ impl EventLoop {
                 GetState:None,
                 RegisterCallback
             };
+            let buffer = OutputBuffer { buffer: data_slice };
             let active_callbacks = self.active_callbacks.clone();
             let res = match bu.RegisterCallback.unwrap()(bu,Some(c_render_callback),content as *mut _ as *mut std::os::raw::c_void).unwrap(){
                 SLresult::Success=>{
@@ -329,7 +330,7 @@ pub struct OutputBuffer<'a, T: 'a> {
 impl<'a, T> InputBuffer<'a, T> {
     #[inline]
     pub fn buffer(&self) -> &[T] {
-        unimplemented!()
+        &mut self.buffer
     }
 
     #[inline]
@@ -340,12 +341,12 @@ impl<'a, T> InputBuffer<'a, T> {
 impl<'a, T> OutputBuffer<'a, T> {
     #[inline]
     pub fn buffer(&mut self) -> &mut [T] {
-        unimplemented!()
+        &mut self.buffer
     }
 
     #[inline]
     pub fn len(&self) -> usize {
-        0
+        self.buffer.len()
     }
 
     #[inline]

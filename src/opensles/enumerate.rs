@@ -3,13 +3,11 @@ use opensles::bindings::{SLDataLocator_AndroidSimpleBufferQueue,SLDataFormat_PCM
 use opensles::bindings::{SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,SL_DATAFORMAT_PCM,SL_SAMPLINGRATE_8,
 SL_PCMSAMPLEFORMAT_FIXED_16,SL_SPEAKER_FRONT_CENTER,SL_BYTEORDER_LITTLEENDIAN};
 use opensles::bindings::{SLInterfaceID,SLboolean,SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND};
-
-
+use opensles::bindings::SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+use super::macrobinds::*;
 pub struct Devices{
     object:Option<SLObjectItf>,
-    ids: SLInterfaceID,
-    req: SLboolean,
-    engineEngine:SLEngineItf
+    deviceid: SLuint32,
 }
 
 unsafe impl Send for Devices {
@@ -21,10 +19,6 @@ impl Default for Devices {
     fn default() -> Devices {
         Devices{
             object:None,
-            ids: SLInterfaceID{
-                time_low:SL_IID_BUFFERQUEUE,
-                time_mid:SL_IID_VOLUME, SL_IID_EFFECTSEND,
-                                    SL_IID_MUTESOLO},
             req: SLboolean
         }
     }
@@ -47,10 +41,10 @@ impl Iterator for Devices {
         let audioSrc = SLDataSource{
             pLocator:&loc_bufq,
             pFormat: &format_pcm};
-
+        let ids = [SL_IID_ANDROIDSIMPLEBUFFERQUEUE];    
         let bqPlayerObject: Option<SLObjectItf> = None;
         let mut result = (*engineEngine)->self.object.CreateAudioPlayer(engineEngine, &bqPlayerObject, &audioSrc, &audioSnk,
-                bqPlayerSampleRate? 2 : 3, self.ids, self.req);
+                bqPlayerSampleRate? 2 : 3, ids, self.req);
         assert(SL_RESULT_SUCCESS,result);
 
         // realize the player
