@@ -16,6 +16,7 @@ use std::thread;
 use std::time::Duration;
 use std;
 mod enumerate;
+mod macrobinds;
 use super::macrobinds::*;
 use sampleformat::SampleFormat;
 
