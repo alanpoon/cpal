@@ -1,5 +1,5 @@
 extern crate opensles;
-use opensles::bindings::{SLuint32,SLboolean};
+use opensles::bindings::*;
 pub const SL_DATALOCATOR_IODEVICE:SLuint32 = 0x00000003;
 pub const SL_IODEVICE_AUDIOINPUT:SLuint32 = 0x00000001;
 pub const SL_DEFAULTDEVICEID_AUDIOINPUT:SLuint32 = 0xFFFFFFFF;
@@ -24,6 +24,13 @@ pub const SL_RESULT_SUCCESS:SLuint32 = 0x00000000;
 pub const SL_BOOLEAN_TRUE:SLboolean = 0x00000001;
 pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 fn main() {
-    
-
+    let engineObject:SLObjectItf;
+    let engineEngine:SLEngineItf;
+    let outputMixObject:SLObjectItf;
+    let bqPlayerObject:SLObjectItf;
+    let bqPlayerPlay:SLPlayItf;
+    let bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
+    let bqPlayerMuteSolo:SLMuteSoloItf;
+    let bqPlayerVolume:SLVolumeItf;
+    let buffer[2][512]
 }
