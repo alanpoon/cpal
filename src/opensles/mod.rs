@@ -17,7 +17,7 @@ use std::time::Duration;
 use std;
 mod enumerate;
 mod macrobinds;
-use self::opensles::macrobinds::*;
+use self::macrobinds::{SL_SPEAKER_FRONT_LEFT,SL_SPEAKER_FRONT_RIGHT,SL_SPEAKER_FRONT_CENTER};
 use sampleformat::SampleFormat;
 
 pub struct EventLoop{

@@ -1,4 +1,4 @@
-use opensles::bindings::*;
+use opensles::bindings::{SLuint32,SLboolean};
 pub const SL_DATALOCATOR_IODEVICE:SLuint32 = 0x00000003;
 pub const SL_IODEVICE_AUDIOINPUT:SLuint32 = 0x00000001;
 pub const SL_DEFAULTDEVICEID_AUDIOINPUT:SLuint32 = 0xFFFFFFFF;
