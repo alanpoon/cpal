@@ -321,11 +321,11 @@ impl Iterator for SupportedOutputFormats {
 }
 
 pub struct InputBuffer<'a, T: 'a> {
-    marker: PhantomData<&'a T>,
+    buffer: &'a [T],
 }
 
 pub struct OutputBuffer<'a, T: 'a> {
-    marker: PhantomData<&'a mut T>,
+    buffer: &'a mut [T],
 }
 
 impl<'a, T> InputBuffer<'a, T> {
