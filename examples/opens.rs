@@ -24,13 +24,24 @@ pub const SL_RESULT_SUCCESS:SLuint32 = 0x00000000;
 pub const SL_BOOLEAN_TRUE:SLboolean = 0x00000001;
 pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 fn main() {
-    let engineObject:SLObjectItf;
-    let engineEngine:SLEngineItf;
+    let engineEngine:SLEngineItf;    
     let outputMixObject:SLObjectItf;
+    let outputMixEnvironmentalReverb:SLEnvironmentalReverbItf;
+    // buffer queue player interfaces
     let bqPlayerObject:SLObjectItf;
     let bqPlayerPlay:SLPlayItf;
     let bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
+    let bqPlayerEffectSend:SLEffectSendItf;
     let bqPlayerMuteSolo:SLMuteSoloItf;
     let bqPlayerVolume:SLVolumeItf;
-    let buffer[2][512]
+    let bqPlayerSampleRate:SLmilliHertz;
+    let bqPlayerBufSize =0;
+    let buffer:[[u16;2];512];
+    let curBuffer =0;
+    let audioCallback:AndroidAudioCallback;
+
+}
+fn bqPlayerCallback(bq:SLAndroidSimpleBufferQueueItf, context as *mut _ as *mut std::os::raw::c_void) {
+
+
 }
