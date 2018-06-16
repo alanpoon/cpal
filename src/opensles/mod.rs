@@ -17,7 +17,7 @@ use std::time::Duration;
 use std;
 mod enumerate;
 mod macrobinds;
-use super::macrobinds::*;
+use self::opensles::macrobinds::*;
 use sampleformat::SampleFormat;
 
 pub struct EventLoop{

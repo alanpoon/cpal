@@ -4,7 +4,7 @@ use opensles::bindings::{SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,SL_DATAFORMAT_P
 SL_PCMSAMPLEFORMAT_FIXED_16,SL_SPEAKER_FRONT_CENTER,SL_BYTEORDER_LITTLEENDIAN};
 use opensles::bindings::{SLInterfaceID,SLboolean,SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND};
 use opensles::bindings::SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
-use super::macrobinds::*;
+use self::opensles::macrobinds::*;
 pub struct Devices{
     object:Option<SLObjectItf>,
     deviceid: SLuint32,
