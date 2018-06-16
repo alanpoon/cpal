@@ -31,15 +31,21 @@ fn main() {
     // buffer queue player interfaces
     let bqPlayerObject:SLObjectItf;
     let bqPlayerPlay:SLPlayItf;
-    let bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
+    let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
     let bqPlayerMuteSolo:SLMuteSoloItf;
     let bqPlayerVolume:SLVolumeItf;
     let bqPlayerBufSize =0;
     let buffer:[[u16;2];512];
-    let curBuffer =0;
+    let mut curBuffer:usize =0;
 
 }
-fn bqPlayerCallback(bq:SLAndroidSimpleBufferQueueItf, context as *mut _ as *mut std::os::raw::c_void) {
-    assert(bqPlayerBufferQueue,bq);
+fn bqPlayerCallback(bq:SLAndroidSimpleBufferQueueItf, 
+//context as *mut _ as *mut std::os::raw::c_void,
+bqPlayerBufferQueue:&mut SLAndroidSimpleBufferQueueItf,
+buffer:&mut [[u16;2];512],curBuffer:usize ) {
+    assert_eq!(*bqPlayerBufferQueue,bq);
+    let nextBuffer = buffer[curBuffer];
+    let nextSize = buffer[0].len();
+    let result = (***bqPlayerBufferQueue).Enqueue.unwrap()(*bqPlayerBufferQueue,nextBuffer, nextSize);
 
 }
