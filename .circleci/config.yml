@@ -52,5 +52,3 @@ workflows:
   build-test-and-deploy:
     jobs:
       - android-test
-      - asmjs-test
-      - wasm-test
