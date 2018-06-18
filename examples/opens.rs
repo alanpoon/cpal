@@ -27,7 +27,7 @@ pub const SL_BOOLEAN_TRUE:SLboolean = 0x00000001;
 pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
-pub const SL_PLAYSTATE_PLAYING:
+pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 fn main() {
     let engineObject:SLObjectItf;
     let mut engineEngine:SLEngineItf;    
@@ -37,7 +37,7 @@ fn main() {
     let bqPlayerObject:SLObjectItf;
     let mut bqPlayerPlay:SLPlayItf;
     let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
-    let bqPlayerMuteSolo:SLMuteSoloItf;
+    let mut bqPlayerMuteSolo:SLMuteSoloItf;
     let mut bqPlayerVolume:SLVolumeItf;
     let bqPlayerBufSize =0;
     let mut curBuffer:usize =0;
@@ -51,26 +51,21 @@ pub struct Context{
 }
 
 extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_void){
-    
-}
-
-fn bqPlayerCallback(bq:SLAndroidSimpleBufferQueueItf, 
-//context as *mut _ as *mut std::os::raw::c_void,
-bqPlayerBufferQueue:&mut SLAndroidSimpleBufferQueueItf,
-buffer:&mut [[u16;2];512],curBuffer:&mut usize ) {
-    assert_eq!(*bqPlayerBufferQueue,bq);
-    let mut next_buffer = buffer[curBuffer.clone()];
-    let next_size = buffer[0].len() as u32;
+    let context_struct: &mut Context = unsafe { &mut *(context as *mut Context) };
+    assert_eq!(context_struct.bqPlayerBufferQueue,bq);
+    let mut next_buffer = context_struct.buffer[context_struct.curBuffer.clone()];
+    let next_size = context_struct.buffer[0].len() as u32;
     let state_ptr: *mut c_void = &mut next_buffer as *mut _ as *mut c_void;
     unsafe{
-        let result = (***bqPlayerBufferQueue).Enqueue.unwrap()(*bqPlayerBufferQueue,state_ptr, next_size);
+        let result = (**context_struct.bqPlayerBufferQueue).Enqueue.unwrap()(context_struct.bqPlayerBufferQueue,state_ptr, next_size);
         assert_eq!(result,SL_RESULT_SUCCESS);
     }
-    *curBuffer ^= 1;
+    context_struct.curBuffer ^= 1;
 }
-extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
-bqPlayerPlay:&mut SLPlayItf,bqPlayerBufferQueue:&mut SLAndroidSimpleBufferQueueItf,
-bqPlayerVolume:&mut SLVolumeItf)->bool{
+
+fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
+bqPlayerPlay:&mut SLPlayItf,
+bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
     let optionnull:*const SLEngineOption = ptr::null();
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
@@ -120,7 +115,7 @@ bqPlayerVolume:&mut SLVolumeItf)->bool{
         pFormat:pformatnull
     };
     let bqPlayerPlay_ptr:*mut c_void = bqPlayerPlay as *mut _ as *mut c_void;
-    let bqPlayerBufferQueue_ptr:*mut c_void = bqPlayerBufferQueue as *mut _ as *mut c_void;
+    let bqPlayerBufferQueue_ptr:*mut c_void = context.bqPlayerBufferQueue as *mut c_void;
     let register_null:*mut c_void = ptr::null_mut();
     let slvolume_ptr:*mut c_void = bqPlayerVolume as *mut _ as *mut c_void;
     unsafe{
@@ -132,19 +127,28 @@ bqPlayerVolume:&mut SLVolumeItf)->bool{
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_BUFFERQUEUE,bqPlayerBufferQueue_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerBufferQueue).RegisterCallback.unwrap()(*bqPlayerBufferQueue,Some(bqPlayerCallback2),register_null);
+        let result = (**context.bqPlayerBufferQueue).RegisterCallback.unwrap()(context.bqPlayerBufferQueue,Some(bqPlayerCallback2),register_null);
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject, SL_IID_VOLUME, slvolume_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (***bqPlayerPlay).SetPlayState.unwrap()(*bqPlayerPlay,SL_PLAYSTATE_PLAYING);
         assert_eq!(result,SL_PLAYSTATE_PLAYING);
         context.curBuffer = 0;
-        let result = (***bqPlayerBufferQueue).Enqueue.unwrap()(*bqPlayerBufferQueue,buffer[curBuffer], buffer[curBuffer].len());
+        let buff = context.buffer[context.curBuffer];
+        let buff_box = Box::new(buff);
+        let buff_ptr = Box::into_raw(buff_box) as *const c_void;
+        let result = (**context.bqPlayerBufferQueue).Enqueue.unwrap()(context.bqPlayerBufferQueue,buff_ptr, context.buffer[context.curBuffer].len() as u32);
         if SL_RESULT_SUCCESS != result {
             return false;
         }
         context.curBuffer ^= 1;
         return true;
     }
-    
+}
+fn OpenSLWrap_Shutdown(bqPlayerObject:&mut SLObjectItf,bqPlayerPlay:&mut SLPlayItf,
+bqPlayerMuteSolo:&mut SLMuteSoloItf,bqPlayerVolume:&mut SLVolumeItf){
+    if !bqPlayerVolume.is_null(){
+        *bqPlayerVolume = ptr::null();
+    }
+    //I am converting some c++ code to rust. I can certainty use optional value. but I want to know what happens if I equal *bqPlayerObject = stdtr::null()
 }
