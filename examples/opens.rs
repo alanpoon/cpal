@@ -27,6 +27,7 @@ pub const SL_BOOLEAN_TRUE:SLboolean = 0x00000001;
 pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
+pub const SL_PLAYSTATE_PLAYING:
 fn main() {
     let engineObject:SLObjectItf;
     let mut engineEngine:SLEngineItf;    
@@ -39,13 +40,20 @@ fn main() {
     let bqPlayerMuteSolo:SLMuteSoloItf;
     let mut bqPlayerVolume:SLVolumeItf;
     let bqPlayerBufSize =0;
-    let buffer:[[u16;2];512];
     let mut curBuffer:usize =0;
-
+    let mut context:Context;
+    context.curBuffer =0;
 }
-extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context as *mut _ as *mut std::os::raw::c_void){
+pub struct Context{
+    buffer:[[u16;2];512],
+    bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf,
+    curBuffer:usize
+}
+
+extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_void){
     
 }
+
 fn bqPlayerCallback(bq:SLAndroidSimpleBufferQueueItf, 
 //context as *mut _ as *mut std::os::raw::c_void,
 bqPlayerBufferQueue:&mut SLAndroidSimpleBufferQueueItf,
@@ -62,7 +70,7 @@ buffer:&mut [[u16;2];512],curBuffer:&mut usize ) {
 }
 extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
 bqPlayerPlay:&mut SLPlayItf,bqPlayerBufferQueue:&mut SLAndroidSimpleBufferQueueItf,
-bqPlayerVolume:&mut SLVolumeItf){
+bqPlayerVolume:&mut SLVolumeItf)->bool{
     let optionnull:*const SLEngineOption = ptr::null();
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
@@ -124,9 +132,19 @@ bqPlayerVolume:&mut SLVolumeItf){
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_BUFFERQUEUE,bqPlayerBufferQueue_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerBufferQueue).RegisterCallback.unwrap()(*bqPlayerBufferQueue,Some(bqPlayerCallback),register_null);
+        let result = (***bqPlayerBufferQueue).RegisterCallback.unwrap()(*bqPlayerBufferQueue,Some(bqPlayerCallback2),register_null);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        //let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject, SL_IID_VOLUME, slvolume_ptr);
+        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject, SL_IID_VOLUME, slvolume_ptr);
+        assert_eq!(result,SL_RESULT_SUCCESS);
+        let result = (***bqPlayerPlay).SetPlayState.unwrap()(*bqPlayerPlay,SL_PLAYSTATE_PLAYING);
+        assert_eq!(result,SL_PLAYSTATE_PLAYING);
+        context.curBuffer = 0;
+        let result = (***bqPlayerBufferQueue).Enqueue.unwrap()(*bqPlayerBufferQueue,buffer[curBuffer], buffer[curBuffer].len());
+        if SL_RESULT_SUCCESS != result {
+            return false;
+        }
+        context.curBuffer ^= 1;
+        return true;
     }
     
 }
