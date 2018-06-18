@@ -16,7 +16,7 @@ jobs:
       - checkout
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
-      - run: cargo apk build --example opensles
+      - run: cargo apk build --example opens
       - save_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
           paths:
