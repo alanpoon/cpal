@@ -25,6 +25,7 @@ pub const SL_SAMPLINGRATE_192:SLuint32 = 192000000;
 pub const SL_RESULT_SUCCESS:SLuint32 = 0x00000000;
 pub const SL_BOOLEAN_TRUE:SLboolean = 0x00000001;
 pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
+pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 fn main() {
     let engineObject:SLObjectItf;
@@ -33,7 +34,7 @@ fn main() {
 
     // buffer queue player interfaces
     let bqPlayerObject:SLObjectItf;
-    let bqPlayerPlay:SLPlayItf;
+    let mut bqPlayerPlay:SLPlayItf;
     let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
     let bqPlayerMuteSolo:SLMuteSoloItf;
     let bqPlayerVolume:SLVolumeItf;
@@ -56,7 +57,8 @@ buffer:&mut [[u16;2];512],curBuffer:&mut usize ) {
     }
     *curBuffer ^= 1;
 }
-extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf){
+extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
+bqPlayerPlay:&mut SLPlayItf){
     let optionnull:*const SLEngineOption = ptr::null();
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
@@ -73,12 +75,13 @@ extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SL
         let result = (***outputMixObject).Realize.unwrap()(*outputMixObject,SL_BOOLEAN_FALSE);
         assert_eq!(result,SL_RESULT_SUCCESS);
     }
-    let loc_bufq:SLDataLocator_AndroidSimpleBufferQueue = SLDataLocator_AndroidSimpleBufferQueue{
-        locatorType:SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
+
+    let mut loc_bufq:SLDataLocator_AndroidSimpleBufferQueue = SLDataLocator_AndroidSimpleBufferQueue{
+        locatorType:2,
         numBuffers:2
     };
-    let format_pcm = SLDataFormat_PCM{
-        formatType:SL_DATAFORMAT_PCM,
+    let mut format_pcm = SLDataFormat_PCM{
+        formatType:2,
         numChannels:2,
         samplesPerSec:SL_SAMPLINGRATE_44_1,
         bitsPerSample:SL_PCMSAMPLEFORMAT_FIXED_16,
@@ -86,8 +89,35 @@ extern "C" fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SL
         channelMask:SL_SPEAKER_FRONT_LEFT,
         endianness:SL_BYTEORDER_LITTLEENDIAN
     };
+    
+    let loc_bufq_ptr:*mut c_void = &mut loc_bufq as *mut _ as *mut c_void;
+    let p_format_ptr:*mut c_void = &mut format_pcm as *mut _ as *mut c_void;
     let audioSrc = SLDataSource_{
-        pLocator:&loc_bufq,
-        pFormat:&format_pcm
+        pLocator:loc_bufq_ptr,
+        pFormat:p_format_ptr
     };
+    // configure audio sink
+    let mut loc_outmix =SLDataLocator_OutputMix{
+        locatorType:SL_DATALOCATOR_OUTPUTMIX,
+        outputMix:*outputMixObject
+    };
+    let loc_outmix_ptr:*mut c_void = &mut loc_outmix as *mut _ as *mut c_void;
+    let pformatnull:*mut c_void = ptr::null_mut();
+    let audioSnk = SLDataSink{
+        pLocator:loc_outmix_ptr,
+        pFormat:pformatnull
+    };
+    let bqPlayerPlay_ptr:*mut c_void = bqPlayerPlay as *mut _ as *mut c_void;
+    let bqPlayerBufferQueue_ptr:*mut c_void = 
+    unsafe{
+        let ids:[SLInterfaceID;2]=[SL_IID_BUFFERQUEUE,SL_IID_VOLUME];
+        let req:[SLboolean;2]=[SL_BOOLEAN_TRUE,SL_BOOLEAN_TRUE];
+        let result = (***bqPlayerObject).Realize.unwrap()(*bqPlayerObject,SL_BOOLEAN_FALSE);
+        assert_eq!(result,SL_RESULT_SUCCESS);
+        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_PLAY,bqPlayerPlay_ptr);
+        assert_eq!(result,SL_RESULT_SUCCESS);
+        
+        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_BUFFERQUEUE,bqPlayerBufferQueue_ptr);
+    }
+    
 }
