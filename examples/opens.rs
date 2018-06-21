@@ -146,9 +146,24 @@ bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
     }
 }
 fn OpenSLWrap_Shutdown(bqPlayerObject:&mut SLObjectItf,bqPlayerPlay:&mut SLPlayItf,
-bqPlayerMuteSolo:&mut SLMuteSoloItf,bqPlayerVolume:&mut SLVolumeItf){
-    if !bqPlayerVolume.is_null(){
+bqPlayerMuteSolo:&mut SLMuteSoloItf,bqPlayerVolume:&mut SLVolumeItf,
+engineEngine:&mut SLObjectItf,
+engineObject:&mut SLObjectItf,
+outputMixObject:&mut SLObjectItf,
+context:&mut Context){
+    if !bqPlayerObject.is_null(){
+        *bqPlayerObject = ptr::null();
+        *bqPlayerPlay = ptr::null();
+        context.bqPlayerBufferQueue = ptr::null();
+        *bqPlayerMuteSolo = ptr::null();
         *bqPlayerVolume = ptr::null();
+    }
+    if !outputMixObject.is_null(){
+        *outputMixObject = ptr::null();
+    }
+    if !engineObject.is_null(){
+        *engineObject = ptr::null();
+        *engineEngine = ptr::null();
     }
     //I am converting some c++ code to rust. I can certainty use optional value. but I want to know what happens if I equal *bqPlayerObject = stdtr::null()
 }
