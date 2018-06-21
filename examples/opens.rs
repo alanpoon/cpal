@@ -29,12 +29,12 @@ pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 fn main() {
-    let engineObject:SLObjectItf;
+    let mut engineObject:SLObjectItf;
     let mut engineEngine:SLEngineItf;    
-    let outputMixObject:SLObjectItf;
+    let mut outputMixObject:SLObjectItf;
 
     // buffer queue player interfaces
-    let bqPlayerObject:SLObjectItf;
+    let mut bqPlayerObject:SLObjectItf;
     let mut bqPlayerPlay:SLPlayItf;
     let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
     let mut bqPlayerMuteSolo:SLMuteSoloItf;
@@ -43,6 +43,11 @@ fn main() {
     let mut curBuffer:usize =0;
     let mut context:Context;
     context.curBuffer =0;
+
+    OpenSLWrap_Init(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
+    &mut bqPlayerPlay,&mut bqPlayerVolume,&mut context);
+    OpenSLWrap_Shutdown(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
+    &mut bqPlayerPlay,&mut bqPlayerVolume,&mut bqPlayerMuteSolo,&mut context);
 }
 pub struct Context{
     buffer:[[u16;2];512],
@@ -70,7 +75,7 @@ bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
     unsafe{
-        let mut result = slCreateEngine(engineObject,0,optionnull,0, pinterfaceidnull,pInterfaceRequirednull);
+        let result = slCreateEngine(engineObject,0,optionnull,0, pinterfaceidnull,pInterfaceRequirednull);
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (***engineObject).Realize.unwrap()(*engineObject,SL_BOOLEAN_FALSE);
         assert_eq!(result,SL_RESULT_SUCCESS);
@@ -145,11 +150,9 @@ bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
         return true;
     }
 }
-fn OpenSLWrap_Shutdown(bqPlayerObject:&mut SLObjectItf,bqPlayerPlay:&mut SLPlayItf,
-bqPlayerMuteSolo:&mut SLMuteSoloItf,bqPlayerVolume:&mut SLVolumeItf,
-engineEngine:&mut SLObjectItf,
-engineObject:&mut SLObjectItf,
-outputMixObject:&mut SLObjectItf,
+fn OpenSLWrap_Shutdown(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
+bqPlayerPlay:&mut SLPlayItf,bqPlayerVolume:&mut SLVolumeItf,
+bqPlayerMuteSolo:&mut SLMuteSoloItf,
 context:&mut Context){
     if !bqPlayerObject.is_null(){
         *bqPlayerObject = ptr::null();
