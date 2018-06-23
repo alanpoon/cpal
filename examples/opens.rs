@@ -29,25 +29,19 @@ pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 fn main() {
-    let mut engineObject:SLObjectItf;
-    let mut engineEngine:SLEngineItf;    
-    let mut outputMixObject:SLObjectItf;
 
-    // buffer queue player interfaces
-    let mut bqPlayerObject:SLObjectItf;
-    let mut bqPlayerPlay:SLPlayItf;
-    let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
-    let mut bqPlayerMuteSolo:SLMuteSoloItf;
-    let mut bqPlayerVolume:SLVolumeItf;
     let bqPlayerBufSize =0;
     let mut curBuffer:usize =0;
     let mut context:Context;
     context.curBuffer =0;
 
-    OpenSLWrap_Init(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
-    &mut bqPlayerPlay,&mut bqPlayerVolume,&mut context);
-    OpenSLWrap_Shutdown(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
+    loop{
+        OpenSLWrap_Init(&mut context);
+    }
+    
+    /*OpenSLWrap_Shutdown(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
     &mut bqPlayerPlay,&mut bqPlayerVolume,&mut bqPlayerMuteSolo,&mut context);
+    */
 }
 pub struct Context{
     buffer:[[u16;2];512],
@@ -68,23 +62,29 @@ extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_
     context_struct.curBuffer ^= 1;
 }
 
-fn OpenSLWrap_Init(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
-bqPlayerPlay:&mut SLPlayItf,
-bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
+fn OpenSLWrap_Init(context:&mut Context)->bool{
+    let mut engineObject:SLObjectItf;
+    let mut engineEngine:SLEngineItf;    
+    let mut outputMixObject:SLObjectItf;
+    let mut bqPlayerObject:SLObjectItf;
+    let mut bqPlayerPlay:SLPlayItf;
+    let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
+    let mut bqPlayerMuteSolo:SLMuteSoloItf;
+    let mut bqPlayerVolume:SLVolumeItf;
     let optionnull:*const SLEngineOption = ptr::null();
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
     unsafe{
-        let result = slCreateEngine(engineObject,0,optionnull,0, pinterfaceidnull,pInterfaceRequirednull);
+        let result = slCreateEngine(&mut engineObject,0,optionnull,0, pinterfaceidnull,pInterfaceRequirednull);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***engineObject).Realize.unwrap()(*engineObject,SL_BOOLEAN_FALSE);
+        let result = (**engineObject).Realize.unwrap()(engineObject,SL_BOOLEAN_FALSE);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let engine_ptr: *mut c_void = engineEngine as *mut _ as *mut c_void;
-        let result = (***engineObject).GetInterface.unwrap()(*engineObject,SL_IID_ENGINE,engine_ptr);
+        let engine_ptr: *mut c_void = engineEngine as *mut c_void;
+        let result = (**engineObject).GetInterface.unwrap()(engineObject,SL_IID_ENGINE,engine_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***engineEngine).CreateOutputMix.unwrap()(*engineEngine,outputMixObject,0,pinterfaceidnull,&0);
+        let result = (**engineEngine).CreateOutputMix.unwrap()(engineEngine,&mut outputMixObject,0,pinterfaceidnull,&0);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***outputMixObject).Realize.unwrap()(*outputMixObject,SL_BOOLEAN_FALSE);
+        let result = (**outputMixObject).Realize.unwrap()(outputMixObject,SL_BOOLEAN_FALSE);
         assert_eq!(result,SL_RESULT_SUCCESS);
     }
 
@@ -111,7 +111,7 @@ bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
     // configure audio sink
     let mut loc_outmix =SLDataLocator_OutputMix{
         locatorType:SL_DATALOCATOR_OUTPUTMIX,
-        outputMix:*outputMixObject
+        outputMix:outputMixObject
     };
     let loc_outmix_ptr:*mut c_void = &mut loc_outmix as *mut _ as *mut c_void;
     let pformatnull:*mut c_void = ptr::null_mut();
@@ -119,24 +119,24 @@ bqPlayerVolume:&mut SLVolumeItf,context:&mut Context)->bool{
         pLocator:loc_outmix_ptr,
         pFormat:pformatnull
     };
-    let bqPlayerPlay_ptr:*mut c_void = bqPlayerPlay as *mut _ as *mut c_void;
+    let bqPlayerPlay_ptr:*mut c_void = bqPlayerPlay as *mut c_void;
     let bqPlayerBufferQueue_ptr:*mut c_void = context.bqPlayerBufferQueue as *mut c_void;
     let register_null:*mut c_void = ptr::null_mut();
-    let slvolume_ptr:*mut c_void = bqPlayerVolume as *mut _ as *mut c_void;
+    let slvolume_ptr:*mut c_void = bqPlayerVolume as *mut c_void;
     unsafe{
         let ids:[SLInterfaceID;2]=[SL_IID_BUFFERQUEUE,SL_IID_VOLUME];
         let req:[SLboolean;2]=[SL_BOOLEAN_TRUE,SL_BOOLEAN_TRUE];
-        let result = (***bqPlayerObject).Realize.unwrap()(*bqPlayerObject,SL_BOOLEAN_FALSE);
+        let result = (**bqPlayerObject).Realize.unwrap()(bqPlayerObject,SL_BOOLEAN_FALSE);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_PLAY,bqPlayerPlay_ptr);
+        let result = (**bqPlayerObject).GetInterface.unwrap()(bqPlayerObject,SL_IID_PLAY,bqPlayerPlay_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject,SL_IID_BUFFERQUEUE,bqPlayerBufferQueue_ptr);
+        let result = (**bqPlayerObject).GetInterface.unwrap()(bqPlayerObject,SL_IID_BUFFERQUEUE,bqPlayerBufferQueue_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
         let result = (**context.bqPlayerBufferQueue).RegisterCallback.unwrap()(context.bqPlayerBufferQueue,Some(bqPlayerCallback2),register_null);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerObject).GetInterface.unwrap()(*bqPlayerObject, SL_IID_VOLUME, slvolume_ptr);
+        let result = (**bqPlayerObject).GetInterface.unwrap()(bqPlayerObject, SL_IID_VOLUME, slvolume_ptr);
         assert_eq!(result,SL_RESULT_SUCCESS);
-        let result = (***bqPlayerPlay).SetPlayState.unwrap()(*bqPlayerPlay,SL_PLAYSTATE_PLAYING);
+        let result = (**bqPlayerPlay).SetPlayState.unwrap()(bqPlayerPlay,SL_PLAYSTATE_PLAYING);
         assert_eq!(result,SL_PLAYSTATE_PLAYING);
         context.curBuffer = 0;
         let buff = context.buffer[context.curBuffer];
