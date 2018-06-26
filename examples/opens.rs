@@ -2,6 +2,7 @@ extern crate opensles;
 use opensles::bindings::*;
 use std::os::raw::c_void;
 use std::ptr;
+use std::mem;
 pub const SL_DATALOCATOR_IODEVICE:SLuint32 = 0x00000003;
 pub const SL_IODEVICE_AUDIOINPUT:SLuint32 = 0x00000001;
 pub const SL_DEFAULTDEVICEID_AUDIOINPUT:SLuint32 = 0xFFFFFFFF;
@@ -32,7 +33,7 @@ fn main() {
 
     let bqPlayerBufSize =0;
     let mut curBuffer:usize =0;
-    let mut context:Context;
+    let mut context:Context = unsafe{mem::zeroed()};
     context.curBuffer =0;
 
     loop{
@@ -63,14 +64,14 @@ extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_
 }
 
 fn OpenSLWrap_Init(context:&mut Context)->bool{
-    let mut engineObject:SLObjectItf;
-    let mut engineEngine:SLEngineItf;    
-    let mut outputMixObject:SLObjectItf;
-    let mut bqPlayerObject:SLObjectItf;
-    let mut bqPlayerPlay:SLPlayItf;
-    let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf;
-    let mut bqPlayerMuteSolo:SLMuteSoloItf;
-    let mut bqPlayerVolume:SLVolumeItf;
+    let mut engineObject:SLObjectItf = unsafe{mem::zeroed()};
+    let mut engineEngine:SLEngineItf= unsafe{mem::zeroed()};    
+    let mut outputMixObject:SLObjectItf= unsafe{mem::zeroed()};
+    let mut bqPlayerObject:SLObjectItf= unsafe{mem::zeroed()};
+    let mut bqPlayerPlay:SLPlayItf= unsafe{mem::zeroed()};
+    let mut bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf= unsafe{mem::zeroed()};
+    let mut bqPlayerMuteSolo:SLMuteSoloItf= unsafe{mem::zeroed()};
+    let mut bqPlayerVolume:SLVolumeItf= unsafe{mem::zeroed()};
     let optionnull:*const SLEngineOption = ptr::null();
     let pinterfaceidnull:*const SLInterfaceID = ptr::null();
     let pInterfaceRequirednull:*const SLboolean = ptr::null();
