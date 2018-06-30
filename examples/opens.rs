@@ -185,7 +185,7 @@ context:&mut Context){
 fn audio_callback(context_struct:&mut Context, num_samples:usize){
     let sample_rate = context_struct.sample_rate.clone();
     for sample in context_struct.buffer[context_struct.curBuffer].chunks_mut(num_samples){
-        let value = ((*(context_struct.next_value)(&mut context_struct.sample_clock,sample_rate) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
+        let value = (((*context_struct.next_value)(&mut context_struct.sample_clock,sample_rate) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
                     for out in sample.iter_mut() {
                         *out = value;
                     }
