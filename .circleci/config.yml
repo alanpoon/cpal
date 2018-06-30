@@ -7,6 +7,7 @@ jobs:
     docker:
       - image: tomaka/cargo-apk
     steps:
+      - run: rustup update
       - run: apt-get -qq update
       - run: apt-get install python-software-properties software-properties-common -y --fix-missing
       - run: sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
