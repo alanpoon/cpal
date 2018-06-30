@@ -36,11 +36,11 @@ fn main() {
     let mut curBuffer:usize =0;
     let mut context:Context = unsafe{mem::zeroed()};
     context.curBuffer =0;
-    context.sample_rate =200;
-    context.sample_clock=0;
-    context.next_value=|sample_clock:&mut f32|->f32{
+    context.sample_rate =200.0;
+    context.sample_clock=0.0;
+    context.next_value=|sample_clock:&mut f32,sample_clock:f32|->f32{
         sample_clock = (sample_clock + 1.0) % sample_rate;
-        (sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
+        (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
     };
 
     loop{
@@ -183,8 +183,9 @@ context:&mut Context){
     //I am converting some c++ code to rust. I can certainty use optional value. but I want to know what happens if I equal *bqPlayerObject = stdtr::null()
 }
 fn audio_callback(context_struct:&mut Context, num_samples:usize){
+    let sample_rate = *context_struct.sample_rate.clone();
     for sample in context_struct.buffer[context_struct.curBuffer].chunks_mut(num_samples){
-        let value = ((context_struct.next_value(context_struct.sample_clock) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
+        let value = ((context_struct.next_value(context_struct.sample_clock,sample_rate) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
                     for out in sample.iter_mut() {
                         *out = value;
                     }
