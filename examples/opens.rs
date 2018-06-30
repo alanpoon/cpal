@@ -39,7 +39,7 @@ fn main() {
     context.sample_rate =200.0;
     context.sample_clock=0.0;
     context.next_value=Box::new(|sample_clock:&mut f32,sample_rate:f32|->f32{
-        sample_clock = (sample_clock + 1.0) % sample_rate;
+        *sample_clock = (*sample_clock + 1.0) % sample_rate;
         (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
     });
 
@@ -57,7 +57,7 @@ pub struct Context{
     curBuffer:usize,
     sample_clock:f32,
     sample_rate:f32,
-    next_value:Box<Fn(&mut f32)->f32>
+    next_value:Box<Fn(&mut f32,f32)->f32>
 }
 
 extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_void){
