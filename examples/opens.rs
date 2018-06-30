@@ -29,12 +29,19 @@ pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
+pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
 fn main() {
 
     let bqPlayerBufSize =0;
     let mut curBuffer:usize =0;
     let mut context:Context = unsafe{mem::zeroed()};
     context.curBuffer =0;
+    context.sample_rate =200;
+    context.sample_clock=0;
+    context.next_value=|sample_clock:&mut f32|->f32{
+        sample_clock = (sample_clock + 1.0) % sample_rate;
+        (sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
+    };
 
     loop{
         OpenSLWrap_Init(&mut context);
@@ -47,7 +54,10 @@ fn main() {
 pub struct Context{
     buffer:[[u16;2];512],
     bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf,
-    curBuffer:usize
+    curBuffer:usize,
+    sample_clock:f32,
+    sample_rate:f32,
+    next_value:Fn(&mut f32)->f32
 }
 
 extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_void){
@@ -61,6 +71,7 @@ extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_
         assert_eq!(result,SL_RESULT_SUCCESS);
     }
     context_struct.curBuffer ^= 1;
+    audio_callback(context_struct, BUFFER_SIZE_IN_SAMPLES);
 }
 
 fn OpenSLWrap_Init(context:&mut Context)->bool{
@@ -170,4 +181,12 @@ context:&mut Context){
         *engineEngine = ptr::null();
     }
     //I am converting some c++ code to rust. I can certainty use optional value. but I want to know what happens if I equal *bqPlayerObject = stdtr::null()
+}
+fn audio_callback(context_struct:&mut Context, num_samples:usize){
+    for sample in context_struct.buffer[context_struct.curBuffer].chunks_mut(num_samples){
+        let value = ((context_struct.next_value(context_struct.sample_clock) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
+                    for out in sample.iter_mut() {
+                        *out = value;
+                    }
+    }
 }

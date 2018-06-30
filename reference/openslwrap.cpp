@@ -148,3 +148,14 @@ extern "C" void OpenSLWrap_Shutdown() {
     engineEngine = NULL;
   }
 }
+#define LEN (44100 * 2 * 2 * 5)
+static int bytesServed = 0;
+
+void audioCallback(short *buffer, int num_samples) {
+    if (bytesServed > LEN) {
+        memset(buffer, 0, num_samples * 2);
+    } else {
+        bytesServed += num_samples * 2;
+        memset(buffer, 128, num_samples * 2);
+    }
+}
