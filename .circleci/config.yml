@@ -9,6 +9,7 @@ jobs:
     steps:
       - run: rustup self update
       - run: rustup default stable
+      - run: rustup target add arm-linux-androideabi
       - run: rustup update
       - run: rustc --version
       - run: apt-get -qq update
