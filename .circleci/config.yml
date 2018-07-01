@@ -22,6 +22,15 @@ jobs:
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
       - run: cargo apk build --example opens
+      - run: "ls target/android-artifacts/app/build/outputs/apk"
+      - run: "pwd"
+      - run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
+      - run: "zipalign -f 4 ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk ${HOME}/project/target/android-artifacts/app/build/outputs/apk/outfile.apk"
+      - run: "chmod +x .circleci/upload_github_release.sh"
+      - 
+        run: 
+          command: "./.circleci/upload_github_release.sh"
+          name: "Deploy to Github"
       - save_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
           paths:
