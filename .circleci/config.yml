@@ -5,9 +5,10 @@ jobs:
   android-test:
     working_directory: ~/cpal
     docker:     
-      - environment: 
+      - 
+        environment: 
           ANDROID_PLATFORM: android-18
-      - image: tomaka/cargo-apk
+        image: tomaka/cargo-apk
     steps:
       - run: rustup self update
       - run: rustup default stable
