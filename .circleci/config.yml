@@ -4,7 +4,9 @@ jobs:
 
   android-test:
     working_directory: ~/cpal
-    docker:
+    docker:     
+      - environment: 
+          ANDROID_PLATFORM: android-18
       - image: tomaka/cargo-apk
     steps:
       - run: rustup self update
@@ -21,6 +23,7 @@ jobs:
       - checkout
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
+      - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cargo apk build
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
