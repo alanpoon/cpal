@@ -21,7 +21,7 @@ jobs:
       - checkout
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
-      - run: cargo apk build --example opens
+      - run: cargo apk build
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
       #- run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"

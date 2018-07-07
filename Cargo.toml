@@ -11,6 +11,10 @@ keywords = ["audio", "sound"]
 [dependencies]
 lazy_static = "0.2"
 
+[[bin]]
+name = "cpal"
+path = "src/bin/main.rs"
+
 [dev-dependencies]
 hound = "3.0"
 opensles-sys = {git="https://github.com/alanpoon/opensles-sys.git", branch="improvement"}
