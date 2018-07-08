@@ -25,6 +25,7 @@ jobs:
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
+      - run: cd ..
       - run: cargo apk build
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
