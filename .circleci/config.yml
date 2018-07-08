@@ -26,7 +26,9 @@ jobs:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
-      - run: cargo apk build
+      - run: pwd
+      - run: ls
+      - run: cargo apk build --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
       #- run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
