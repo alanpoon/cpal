@@ -12,6 +12,10 @@ keywords = ["audio", "sound"]
 lazy_static = "0.2"
 opensles-sys = {git="https://github.com/alanpoon/opensles-sys.git", branch="improvement"}
 
+[lib]
+name = "cpal"
+path = "src/lib.rs"
+
 [[bin]]
 name = "cpal"
 path = "src/bin/main.rs"
