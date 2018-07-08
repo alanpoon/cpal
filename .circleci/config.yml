@@ -21,9 +21,6 @@ jobs:
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
       - run: apt-get -qq update && apt-get install -y git
       - run: apt-get install -y clang-6.0
-      - checkout
-      - restore_cache:
-          key: android-test-cache-{{ checksum "Cargo.toml" }}
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
       - run: pwd
@@ -37,11 +34,7 @@ jobs:
       - 
         run: 
           command: "./.circleci/upload_github_release.sh"
-          name: "Deploy to Github"
-      - save_cache:
-          key: android-test-cache-{{ checksum "Cargo.toml" }}
-          paths:
-            - target  
+          name: "Deploy to github"
 workflows:
   version: 2
   build-test-and-deploy:
