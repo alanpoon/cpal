@@ -14,8 +14,8 @@ GH_REPO="https://api.github.com/repos/$owner/$repo"
 GH_TAGS="$GH_REPO/releases/latest"
 AUTH="Authorization: token $GITHUB_API_TOKEN"
 
-cp ./target/android-artifacts/app/build/outputs/apk/app-debug.apk $filename
-
+cp ./target $filename
+#/android-artifacts/app/build/outputs/apk/app-debug.apk
 # Validate token.
 curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or network issue!";  exit 1; }
 
