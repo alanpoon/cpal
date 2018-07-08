@@ -21,10 +21,10 @@ jobs:
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
       - run: apt-get -qq update && apt-get install -y git
       - run: apt-get install -y clang-6.0
-      - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - checkout
       - restore_cache:
           key: android-test-cache-{{ checksum "Cargo.toml" }}
+      - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cargo apk build
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
