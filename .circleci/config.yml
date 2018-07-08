@@ -10,6 +10,7 @@ jobs:
           ANDROID_PLATFORM: android-18
         image: tomaka/cargo-apk
     steps:
+      - checkout
       - run: rustup self update
       - run: rustup default stable
       - run: rustup target add armv7-linux-androideabi
