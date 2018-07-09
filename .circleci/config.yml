@@ -26,6 +26,7 @@ jobs:
       - run: cd ..
       - run: pwd
       - run: ls
+      - run: apt-get install zip
       - run: cargo apk build --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
