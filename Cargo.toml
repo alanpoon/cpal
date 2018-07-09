@@ -45,6 +45,7 @@ android_version = 18
 target_sdk_version = 18
 min_sdk_version = 18
 build_targets = ["armv7-linux-androideabi"]
+assets = "assets"
 fullscreen = true
 
 [package.metadata.android.activity_attributes]

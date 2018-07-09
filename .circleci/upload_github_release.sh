@@ -13,10 +13,9 @@ filename=./hardback-debug.apk
 GH_REPO="https://api.github.com/repos/$owner/$repo"
 GH_TAGS="$GH_REPO/releases/latest"
 AUTH="Authorization: token $GITHUB_API_TOKEN"
-zip -r target_z.zip ./target
-cp target_z.zip $filename
-#cp ./target $filename
-#/android-artifacts/app/build/outputs/apk/app-debug.apk
+
+cp ./target/android-artifacts/app/build/outputs/apk/outfile.apk $filename
+
 # Validate token.
 curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or network issue!";  exit 1; }
 
