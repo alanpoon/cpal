@@ -3,7 +3,6 @@ version: 2
 jobs:
 
   android-test:
-    working_directory: ~/cpal
     docker:     
       - 
         environment: 
