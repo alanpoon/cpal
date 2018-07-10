@@ -11,6 +11,12 @@ jobs:
         image: tomaka/cargo-apk
     steps:
       - checkout
+      - run: echo 'export KEYSTORE=${HOME}/project/my-release-key.keystore' >> $BASH_ENV
+      - run: "ls .circleci"
+      - run: "ls ${ANDROID_HOME}/build-tools"
+      - run: echo 'export PATH=${ANDROID_HOME}/build-tools/26.0.1:${PATH}' >> $BASH_ENV
+      - run: "chmod +x .circleci/download_keystore.sh"
+      - run: "./.circleci/download_keystore.sh      
       - run: rustup self update
       - run: rustup default stable
       - run: rustup target add armv7-linux-androideabi
