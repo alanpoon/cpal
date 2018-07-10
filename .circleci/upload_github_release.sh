@@ -11,7 +11,7 @@ owner=$CIRCLE_PROJECT_USERNAME
 repo=$CIRCLE_PROJECT_REPONAME
 filename=./hardback-debug.apk
 GH_REPO="https://api.github.com/repos/$owner/$repo"
-GH_TAGS="$GH_REPO/releases/latest"
+GH_TAGS="$GH_REPO/releases"
 AUTH="Authorization: token $GITHUB_API_TOKEN"
 
 cp ./target/android-artifacts/app/build/outputs/apk/outfile.apk $filename
@@ -21,7 +21,7 @@ curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or 
 
 # Create a release
 RELEASE_URL="https://api.github.com/repos/$owner/$repo/releases?access_token=$GITHUB_API_TOKEN"
-#curl --data "{\"tag_name\": \"$tag\"}" $RELEASE_URL
+curl --data "{\"draft\": \"true\"}" $RELEASE_URL
 curl $RELEASE_URL
 
 # Read asset tags
