@@ -11,7 +11,7 @@ owner=$CIRCLE_PROJECT_USERNAME
 repo=$CIRCLE_PROJECT_REPONAME
 filename=./hardback-debug.apk
 GH_REPO="https://api.github.com/repos/$owner/$repo"
-GH_TAGS="$GH_REPO/releases"
+GH_TAGS="$GH_REPO/releases/latest"
 AUTH="Authorization: token $GITHUB_API_TOKEN"
 
 cp ./target/android-artifacts/app/build/outputs/apk/outfile.apk $filename
