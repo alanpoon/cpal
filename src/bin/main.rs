@@ -31,7 +31,7 @@ pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
 fn main() {
-
+/*
     let bqPlayerBufSize =0;
     let mut curBuffer:usize =0;
     let mut context:Context = unsafe{mem::zeroed()};
@@ -42,11 +42,11 @@ fn main() {
         *sample_clock = (*sample_clock + 1.0) % sample_rate;
         (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
     });
-
+*/
     loop{
-        OpenSLWrap_Init(&mut context);
+      //  OpenSLWrap_Init(&mut context);
     }
-    
+    */
     /*OpenSLWrap_Shutdown(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
     &mut bqPlayerPlay,&mut bqPlayerVolume,&mut bqPlayerMuteSolo,&mut context);
     */
