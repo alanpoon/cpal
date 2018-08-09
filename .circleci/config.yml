@@ -32,7 +32,7 @@ jobs:
       - run: cd ..
       - run: pwd
       - run: ls
-      - run: cargo apk build --example opens --release --verbose
+      - run: cargo apk build --example conrod --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
       - run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
