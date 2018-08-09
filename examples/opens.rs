@@ -1,6 +1,5 @@
 extern crate opensles;
 #[macro_use] extern crate conrod;
-extern crate glium;
 use opensles::bindings::*;
 use std::os::raw::c_void;
 use std::ptr;
@@ -32,9 +31,9 @@ pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
-use conrod::{self, color, widget, Widget};
+use conrod::{widget, color, Widget};
+use conrod::backend::glium::glium::{self, glutin, Surface};
 use conrod::widget::triangles::Triangle;
-use conrod::backend::glium::glium::{self, Surface};
 use std::thread;
 fn main() {
     
@@ -69,7 +68,7 @@ fn main() {
 
         // construct our `Ui`.
         let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
-
+        let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
         // Generate the widget identifiers.
         widget_ids!(struct Ids { triangles });
         let ids = Ids::new(ui.widget_id_generator());
