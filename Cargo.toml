@@ -11,6 +11,7 @@ keywords = ["audio", "sound"]
 [dependencies]
 lazy_static = "0.2"
 opensles-sys = {git="https://github.com/alanpoon/opensles-sys.git", branch="improvement"}
+android_glue = {version ="0.2.3",optional = true}
 
 [lib]
 name = "cpal"
