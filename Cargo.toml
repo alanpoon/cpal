@@ -12,6 +12,9 @@ keywords = ["audio", "sound"]
 lazy_static = "0.2"
 opensles-sys = {git="https://github.com/alanpoon/opensles-sys.git", branch="improvement"}
 android_glue = {version ="0.2.3",optional = true}
+conrod = { git ="https://github.com/PistonDevelopers/conrod.git", branch="master", features = ["glium","winit"]}
+glium = { version = "0.22"}
+image = "*"
 
 [lib]
 name = "cpal"
@@ -24,9 +27,6 @@ path = "src/bin/main.rs"
 [dev-dependencies]
 hound = "3.0"
 libc = "0.2"
-conrod = { git ="https://github.com/PistonDevelopers/conrod.git", branch="master", features = ["glium","winit"]}
-glium = { version = "0.22"}
-image = "*"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version = "0.3", features = ["audiosessiontypes", "audioclient", "coml2api", "combaseapi", "debug", "devpkey", "handleapi", "ksmedia", "mmdeviceapi", "objbase", "std", "synchapi", "winuser"] }
