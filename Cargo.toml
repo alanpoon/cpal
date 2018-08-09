@@ -26,8 +26,6 @@ libc = "0.2"
 conrod = { git = "https://github.com/jbg/conrod", features = ["winit", "glium"] }
 glium = { git = "https://github.com/jbg/glium" }
 image = "*"
-rusttype = "*"
-android_glue = "*"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version = "0.3", features = ["audiosessiontypes", "audioclient", "coml2api", "combaseapi", "debug", "devpkey", "handleapi", "ksmedia", "mmdeviceapi", "objbase", "std", "synchapi", "winuser"] }
@@ -49,7 +47,7 @@ label = "cpal"
 android_version = 18
 target_sdk_version = 18
 min_sdk_version = 18
-build_targets = ["armv7-linux-androideabi"]
+build_targets = ["arm-linux-androideabi"]
 assets = "assets"
 fullscreen = true
 
