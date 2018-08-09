@@ -4,14 +4,16 @@ use conrod::backend::glium::glium::{self, glutin, Surface};
 use conrod::widget::triangles::Triangle;
 use std::thread;
 fn main() {
+    println!("cpal starting");
     const WIDTH: u32 = 700;
     const HEIGHT: u32 = 400;
-
+    
     // Build the window.
     let mut events_loop = glium::glutin::EventsLoop::new();
     let window = glium::glutin::WindowBuilder::new()
         .with_title("Triangles!")
-        .with_dimensions(WIDTH, HEIGHT);
+        .with_dimensions((WIDTH, HEIGHT).into());
+     println!("cpal window");
     let context = glium::glutin::ContextBuilder::new()
         .with_vsync(true)
         .with_multisampling(4);
@@ -24,13 +26,14 @@ fn main() {
     widget_ids!(struct Ids { triangles });
     let ids = Ids::new(ui.widget_id_generator());
     let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
+    println!("cpal before loop");
     events_loop.run_forever(|event| {
 
         match event.clone() {
             glium::glutin::Event::WindowEvent { event, .. } => match event {
 
                 // Break from the loop upon `Escape` or closed window.
-                glium::glutin::WindowEvent::Closed |
+                glium::glutin::WindowEvent::CloseRequested |
                 glium::glutin::WindowEvent::KeyboardInput {
                     input: glium::glutin::KeyboardInput {
                         virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
