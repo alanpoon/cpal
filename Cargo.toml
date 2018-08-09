@@ -23,6 +23,11 @@ path = "src/bin/main.rs"
 [dev-dependencies]
 hound = "3.0"
 libc = "0.2"
+conrod = { git = "https://github.com/jbg/conrod", features = ["winit", "glium"] }
+glium = { git = "https://github.com/jbg/glium" }
+image = "*"
+rusttype = "*"
+android_glue = "*"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version = "0.3", features = ["audiosessiontypes", "audioclient", "coml2api", "combaseapi", "debug", "devpkey", "handleapi", "ksmedia", "mmdeviceapi", "objbase", "std", "synchapi", "winuser"] }

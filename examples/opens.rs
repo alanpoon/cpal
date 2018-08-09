@@ -1,4 +1,6 @@
 extern crate opensles;
+#[macro_use] extern crate conrod;
+extern crate glium;
 use opensles::bindings::*;
 use std::os::raw::c_void;
 use std::ptr;
@@ -30,22 +32,106 @@ pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
 pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
+use conrod::{self, color, widget, Widget};
+use conrod::widget::triangles::Triangle;
+use conrod::backend::glium::glium::{self, Surface};
+use std::thread;
 fn main() {
+    
+        thread::spawn(move || {
+            let bqPlayerBufSize =0;
+            let mut curBuffer:usize =0;
+            let mut context:Context = unsafe{mem::zeroed()};
+            context.curBuffer =0;
+            context.sample_rate =200.0;
+            context.sample_clock=0.0;
+            context.next_value=Box::new(|sample_clock:&mut f32,sample_rate:f32|->f32{
+                *sample_clock = (*sample_clock + 1.0) % sample_rate;
+                (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
+            });
 
-    let bqPlayerBufSize =0;
-    let mut curBuffer:usize =0;
-    let mut context:Context = unsafe{mem::zeroed()};
-    context.curBuffer =0;
-    context.sample_rate =200.0;
-    context.sample_clock=0.0;
-    context.next_value=Box::new(|sample_clock:&mut f32,sample_rate:f32|->f32{
-        *sample_clock = (*sample_clock + 1.0) % sample_rate;
-        (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
-    });
+            loop{
+                OpenSLWrap_Init(&mut context);
+            }
+        });
+        const WIDTH: u32 = 700;
+        const HEIGHT: u32 = 400;
 
-    loop{
-        OpenSLWrap_Init(&mut context);
-    }
+        // Build the window.
+        let mut events_loop = glium::glutin::EventsLoop::new();
+        let window = glium::glutin::WindowBuilder::new()
+            .with_title("Triangles!")
+            .with_dimensions(WIDTH, HEIGHT);
+        let context = glium::glutin::ContextBuilder::new()
+            .with_vsync(true)
+            .with_multisampling(4);
+        let display = glium::Display::new(window, context, &events_loop).unwrap();
+
+        // construct our `Ui`.
+        let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+
+        // Generate the widget identifiers.
+        widget_ids!(struct Ids { triangles });
+        let ids = Ids::new(ui.widget_id_generator());
+        let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
+        events_loop.run_forever(|event| {
+
+            match event.clone() {
+                glium::glutin::Event::WindowEvent { event, .. } => match event {
+
+                    // Break from the loop upon `Escape` or closed window.
+                    glium::glutin::WindowEvent::Closed |
+                    glium::glutin::WindowEvent::KeyboardInput {
+                        input: glium::glutin::KeyboardInput {
+                            virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
+                            ..
+                        },
+                        ..
+                    } => return glium::glutin::ControlFlow::Break,
+
+                    _ => (),
+                },
+                _ => (),
+            }
+
+            // Use the `winit` backend feature to convert the winit event to a conrod one.
+            let input = match conrod::backend::winit::convert_event(event, &display) {
+                None => return glium::glutin::ControlFlow::Continue,
+                Some(input) => input,
+            };
+
+            // Handle the input with the `Ui`.
+            ui.handle_event(input);
+
+            // Set the triangle widget.
+            {
+                let ui = &mut ui.set_widgets();
+                let rect = ui.rect_of(ui.window).unwrap();
+                let (l, r, b, t) = rect.l_r_b_t();
+                let (c1, c2, c3) = (color::RED.to_rgb(), color::GREEN.to_rgb(), color::BLUE.to_rgb());
+
+                let triangles = [
+                    Triangle([([l, b], c1), ([l, t], c2), ([r, t], c3)]),
+                    Triangle([([r, t], c1), ([r, b], c2), ([l, b], c3)]),
+                ];
+
+                widget::Triangles::multi_color(triangles.iter().cloned())
+                    .with_bounding_rect(rect)
+                    .set(ids.triangles, ui);
+            }
+
+            // Draw the `Ui` if it has changed.
+            if let Some(primitives) = ui.draw_if_changed() {
+                renderer.fill(&display, primitives, &image_map);
+                let mut target = display.draw();
+                target.clear_color(0.0, 0.0, 0.0, 1.0);
+                renderer.draw(&display, &mut target, &image_map).unwrap();
+                target.finish().unwrap();
+            }
+
+            glium::glutin::ControlFlow::Continue
+        });
+    
     
     /*OpenSLWrap_Shutdown(&mut engineObject,&mut engineEngine,&mut outputMixObject,&mut bqPlayerObject,
     &mut bqPlayerPlay,&mut bqPlayerVolume,&mut bqPlayerMuteSolo,&mut context);
