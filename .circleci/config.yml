@@ -18,6 +18,7 @@ jobs:
       - run: "./.circleci/download_keystore.sh"     
       - run: rustup self update
       - run: rustup default stable
+      - run: rustup target add arm-linux-androideabi
       - run: rustup target add armv7-linux-androideabi
       - run: rustup update
       - run: rustc --version
