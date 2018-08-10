@@ -11,12 +11,11 @@ fn main() {
     // Build the window.
     let mut events_loop = glium::glutin::EventsLoop::new();
     let window = glium::glutin::WindowBuilder::new()
-        .with_title("Triangles!")
         .with_dimensions((WIDTH, HEIGHT).into());
      println!("cpal window");
-    let context = glium::glutin::ContextBuilder::new()
-        .with_vsync(true)
-        .with_multisampling(4);
+     let context =
+            glium::glutin::ContextBuilder::new()
+                .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
     let display = glium::Display::new(window, context, &events_loop).unwrap();
 
     // construct our `Ui`.
