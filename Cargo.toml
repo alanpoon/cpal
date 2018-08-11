@@ -19,6 +19,7 @@ rusttype = { version = "0.5.0", features = ["gpu_cache"] }
 rand = "0.5"
 android_logger = "0.6.0"
 log = "*"
+alto = "3.0.2"
 
 [lib]
 name = "cpal"
