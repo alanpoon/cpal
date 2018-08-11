@@ -4,6 +4,14 @@ extern crate glium;
 extern crate image;
 extern crate rand;
 extern crate rusttype;
+#[macro_use] extern crate log;
+extern crate android_logger;
+use log::Level;
+use android_logger::Filter;
+
+fn native_activity_create() {
+    android_logger::init_once(Filter::default().with_min_level(Level::Trace), None);
+}
 use conrod::{widget, color, Widget};
 use conrod::backend::glium::glium::{Surface};
 use std::thread;
@@ -12,6 +20,7 @@ use opensles::bindings::*;
 use std::os::raw::c_void;
 use std::ptr;
 use std::mem;
+
 pub const SL_DATALOCATOR_IODEVICE:SLuint32 = 0x00000003;
 pub const SL_IODEVICE_AUDIOINPUT:SLuint32 = 0x00000001;
 pub const SL_DEFAULTDEVICEID_AUDIOINPUT:SLuint32 = 0xFFFFFFFF;
@@ -42,7 +51,9 @@ pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
 mod app;
 mod assets;
 pub fn main() {
+    
      thread::spawn(move || {
+            native_activity_create();
             let bqPlayerBufSize =0;
             let mut curBuffer:usize =0;
             let mut context:Context = unsafe{mem::zeroed()};
@@ -50,13 +61,13 @@ pub fn main() {
             context.sample_rate =200.0;
             context.sample_clock=0.0;
             context.next_value=Box::new(|sample_clock:&mut f32,sample_rate:f32|->f32{
-                println!("next {}",sample_rate);
+                trace!("next {}",sample_rate);
                 *sample_clock = (*sample_clock + 1.0) % sample_rate;
                 (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
             });
 
             loop{
-                println!("tt");
+                trace!("tt");
                 OpenSLWrap_Init(&mut context);
             }
         });
@@ -112,7 +123,7 @@ pub fn main() {
                 first = false;
             }
 
-            println!("Drawing the GUI.");
+            trace!("Drawing the GUI.");
             app::gui(&mut ui.set_widgets(), &ids, &mut demo_app);
 
             if let Some(primitives) = ui.draw_if_changed() {
@@ -172,7 +183,7 @@ pub fn main() {
         }
 
         if let Some(primitives) = primitives {
-            println!("Rendering.");
+            trace!("Rendering.");
             draw(&display, &mut renderer, &image_map, &primitives);
         }
 
