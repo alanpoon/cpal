@@ -10,7 +10,6 @@ keywords = ["audio", "sound"]
 
 [dependencies]
 lazy_static = "0.2"
-opensles-sys = {git="https://github.com/alanpoon/opensles-sys.git", branch="improvement"}
 android_glue = {version ="0.2.3"}
 conrod = { git ="https://github.com/PistonDevelopers/conrod.git", branch="master", features = ["glium","winit"]}
 glium = { version = "0.22"}
