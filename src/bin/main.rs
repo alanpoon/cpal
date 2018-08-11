@@ -5,29 +5,36 @@ extern crate image;
 extern crate rand;
 extern crate rusttype;
 extern crate alto;
-
+#[macro_use] extern crate log;
+extern crate android_logger;
+use log::Level;
+use android_logger::Filter;
 use std::sync::Arc;
 use alto::*;
 use conrod::{widget, color, Widget};
 use conrod::backend::glium::glium::{Surface};
 mod app;
 mod assets;
+fn native_activity_create() {
+    android_logger::init_once(Filter::default().with_min_level(Level::Trace), None);
+}
 pub fn main() {
-    
+    native_activity_create();
+    trace!("start");
      std::thread::spawn(move || {
             let alto = if let Ok(alto) = Alto::load_default() {
 		alto
 	} else {
-		println!("No OpenAL implementation present!");
+		trace!("No OpenAL implementation present!");
 		return;
 	};
 
-	println!("Using output: {:?}", alto.default_output().unwrap());
+	trace!("Using output: {:?}", alto.default_output().unwrap());
 	let dev = alto.open(None).unwrap();
 	let ctx = dev.new_context(None).unwrap();
 
 	let mut slot = if dev.is_extension_present(alto::ext::Alc::Efx) {
-		println!("Using EFX reverb");
+		trace!("Using EFX reverb");
 		if let Ok(slot) = (|| -> AltoResult<_> {
 			let mut slot = ctx.new_aux_effect_slot()?;
 			let mut reverb: efx::EaxReverbEffect = ctx.new_effect()?;
@@ -37,11 +44,11 @@ pub fn main() {
 		})() {
 			Some(slot)
 		} else {
-			println!("Broken router detected; disabling EFX");
+			trace!("Broken router detected; disabling EFX");
 			None
 		}
 	} else {
-		println!("EFX not present");
+		trace!("EFX not present");
 		None
 	};
 
@@ -56,7 +63,7 @@ pub fn main() {
 			src.set_aux_send(0, slot).unwrap();
 		}
 
-		println!("Playing static 440hz sine wave...");
+		trace!("Playing static 440hz sine wave...");
 		src.play();
 
 		std::thread::sleep(std::time::Duration::new(2, 0));
@@ -76,7 +83,7 @@ pub fn main() {
 			src.queue_buffer(buf).unwrap();
 		}
 
-		println!("Playing streaming 220hz sine wave...");
+		trace!("Playing streaming 220hz sine wave...");
 		src.play();
 
 		for _ in 0 .. 15 {
@@ -144,7 +151,7 @@ pub fn main() {
                 first = false;
             }
 
-            println!("Drawing the GUI.");
+            trace!("Drawing the GUI.");
             app::gui(&mut ui.set_widgets(), &ids, &mut demo_app);
 
             if let Some(primitives) = ui.draw_if_changed() {
@@ -204,7 +211,7 @@ pub fn main() {
         }
 
         if let Some(primitives) = primitives {
-            println!("Rendering.");
+            trace!("Rendering.");
             draw(&display, &mut renderer, &image_map, &primitives);
         }
 
