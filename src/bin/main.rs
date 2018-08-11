@@ -1,86 +1,145 @@
 #[macro_use] extern crate conrod;
+extern crate android_glue;
+extern crate glium;
+extern crate image;
+extern crate rand;
+extern crate rusttype;
 use conrod::{widget, color, Widget};
 use conrod::backend::glium::glium::{self, glutin, Surface};
 use conrod::widget::triangles::Triangle;
 use std::thread;
-fn main() {
-    println!("cpal starting");
-    const WIDTH: u32 = 700;
-    const HEIGHT: u32 = 400;
-    
-    // Build the window.
+
+mod app;
+mod assets;
+use glium::Surface;
+pub fn main() {
+    let builder = glium::glutin::WindowBuilder::new();
+    let context = glium::glutin::ContextBuilder::new()
+        .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
     let mut events_loop = glium::glutin::EventsLoop::new();
-    let window = glium::glutin::WindowBuilder::new()
-        .with_dimensions((WIDTH, HEIGHT).into());
-     println!("cpal window");
-     let context =
-            glium::glutin::ContextBuilder::new()
-                .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
-    let display = glium::Display::new(window, context, &events_loop).unwrap();
+    let display = glium::Display::new(builder, context, &events_loop).unwrap();
 
-    // construct our `Ui`.
-    let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
-    let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
-    // Generate the widget identifiers.
-    widget_ids!(struct Ids { triangles });
-    let ids = Ids::new(ui.widget_id_generator());
-    let image_map = conrod::image::Map::<glium::texture::Texture2d>::new();
-    println!("cpal before loop");
-    events_loop.run_forever(|event| {
+    let (w, h) = display.get_framebuffer_dimensions();
+    let mut ui = conrod::UiBuilder::new([w as f64, h as f64]).theme(app::theme()).build();
+    ui.fonts.insert(assets::load_font("LiberationSans-Regular.ttf"));
 
-        match event.clone() {
-            glium::glutin::Event::WindowEvent { event, .. } => match event {
+    let mut image_map: conrod::image::Map<glium::texture::Texture2d> = conrod::image::Map::new();
+    let image_rgba = assets::load_image("rust.png").to_rgba();
+    let dims = image_rgba.dimensions();
+    let raw_image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image_rgba.into_raw(), dims);
+    let texture = glium::texture::Texture2d::new(&display, raw_image).unwrap();
+    let rust_logo = image_map.insert(texture);
 
-                // Break from the loop upon `Escape` or closed window.
-                glium::glutin::WindowEvent::CloseRequested |
-                glium::glutin::WindowEvent::KeyboardInput {
-                    input: glium::glutin::KeyboardInput {
-                        virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
-                        ..
-                    },
-                    ..
-                } => return glium::glutin::ControlFlow::Break,
+    let mut demo_app = app::DemoApp::new(rust_logo);
+    let ids = app::Ids::new(ui.widget_id_generator());
 
-                _ => (),
-            },
-            _ => (),
+    let (event_tx, event_rx) = std::sync::mpsc::channel();
+    let (render_tx, render_rx) = std::sync::mpsc::channel();
+    let events_loop_proxy = events_loop.create_proxy();
+
+    std::thread::spawn(move || {
+        let mut needs_update = true;
+        let mut first = true;
+        loop {
+            if !first {
+                let mut events = Vec::new();
+                while let Ok(event) = event_rx.try_recv() {
+                    events.push(event);
+                }
+
+                if events.is_empty() || !needs_update {
+                    match event_rx.recv() {
+                        Ok(event) => events.push(event),
+                        Err(_) => break
+                    }
+                }
+
+                needs_update = false;
+
+                for event in events {
+                    ui.handle_event(event);
+                    needs_update = true;
+                }
+            }
+            else {
+                first = false;
+            }
+
+            println!("Drawing the GUI.");
+            app::gui(&mut ui.set_widgets(), &ids, &mut demo_app);
+
+            if let Some(primitives) = ui.draw_if_changed() {
+                if render_tx.send(primitives.owned()).is_err() || events_loop_proxy.wakeup().is_err() {
+                    break;
+                }
+            }
         }
-
-        // Use the `winit` backend feature to convert the winit event to a conrod one.
-        let input = match conrod::backend::winit::convert_event(event, &display) {
-            None => return glium::glutin::ControlFlow::Continue,
-            Some(input) => input,
-        };
-
-        // Handle the input with the `Ui`.
-        ui.handle_event(input);
-
-        // Set the triangle widget.
-        {
-            let ui = &mut ui.set_widgets();
-            let rect = ui.rect_of(ui.window).unwrap();
-            let (l, r, b, t) = rect.l_r_b_t();
-            let (c1, c2, c3) = (color::RED.to_rgb(), color::GREEN.to_rgb(), color::BLUE.to_rgb());
-
-            let triangles = [
-                Triangle([([l, b], c1), ([l, t], c2), ([r, t], c3)]),
-                Triangle([([r, t], c1), ([r, b], c2), ([l, b], c3)]),
-            ];
-
-            widget::Triangles::multi_color(triangles.iter().cloned())
-                .with_bounding_rect(rect)
-                .set(ids.triangles, ui);
-        }
-
-        // Draw the `Ui` if it has changed.
-        if let Some(primitives) = ui.draw_if_changed() {
-            renderer.fill(&display, primitives, &image_map);
-            let mut target = display.draw();
-            target.clear_color(0.0, 0.0, 0.0, 1.0);
-            renderer.draw(&display, &mut target, &image_map).unwrap();
-            target.finish().unwrap();
-        }
-
-        glium::glutin::ControlFlow::Continue
     });
+
+    let mut renderer = conrod::backend::glium::Renderer::new(&display).unwrap();
+    let mut last_update = std::time::Instant::now();
+    let mut closed = false;
+    let mut first = true;
+    while !closed {
+        let primitives: Option<conrod::render::OwnedPrimitives>;
+
+        if !first {
+            // Don't loop more rapidly than 60Hz.
+            let sixteen_ms = std::time::Duration::from_millis(16);
+            let now = std::time::Instant::now();
+            let duration_since_last_update = now.duration_since(last_update);
+            if duration_since_last_update < sixteen_ms {
+                std::thread::sleep(sixteen_ms - duration_since_last_update);
+            }
+
+            events_loop.run_forever(|event| {
+                if let Some(event) = conrod::backend::winit::convert_event(event.clone(), &display) {
+                    event_tx.send(event).unwrap();
+                }
+
+                match event {
+                    glium::glutin::Event::WindowEvent { event, .. } => match event {
+                        glium::glutin::WindowEvent::CloseRequested => {
+                            closed = true;
+                            return glium::glutin::ControlFlow::Break;
+                        },
+                        glium::glutin::WindowEvent::Resized(..) => {
+                            if let Some(primitives) = render_rx.iter().next() {
+                                draw(&display, &mut renderer, &image_map, &primitives);
+                            }
+                        },
+                        _ => {},
+                    },
+                    glium::glutin::Event::Awakened => return glium::glutin::ControlFlow::Break,
+                    _ => (),
+                }
+
+                glium::glutin::ControlFlow::Continue
+            });
+
+            primitives = render_rx.try_iter().last();
+        }
+        else {
+            first = false;
+            primitives = render_rx.recv().ok();
+        }
+
+        if let Some(primitives) = primitives {
+            println!("Rendering.");
+            draw(&display, &mut renderer, &image_map, &primitives);
+        }
+
+        last_update = std::time::Instant::now();
+    }
+}
+
+fn draw(display: &glium::Display,
+        renderer: &mut conrod::backend::glium::Renderer,
+        image_map: &conrod::image::Map<glium::Texture2d>,
+        primitives: &conrod::render::OwnedPrimitives) {
+    renderer.fill(display, primitives.walk(), &image_map);
+    let mut target = display.draw();
+    target.clear_color(1.0, 1.0, 1.0, 1.0);
+    renderer.draw(display, &mut target, &image_map).unwrap();
+    target.finish().unwrap();
 }
