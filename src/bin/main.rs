@@ -5,13 +5,12 @@ extern crate image;
 extern crate rand;
 extern crate rusttype;
 use conrod::{widget, color, Widget};
-use conrod::backend::glium::glium::{self, glutin, Surface};
-use conrod::widget::triangles::Triangle;
+use conrod::backend::glium::glium::{Surface};
 use std::thread;
 
 mod app;
 mod assets;
-use glium::Surface;
+
 pub fn main() {
     let builder = glium::glutin::WindowBuilder::new();
     let context = glium::glutin::ContextBuilder::new()
