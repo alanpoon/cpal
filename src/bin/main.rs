@@ -11,6 +11,7 @@ extern crate opensles;
 use opensles::bindings::*;
 use std::os::raw::c_void;
 use std::ptr;
+use std::mem;
 pub const SL_DATALOCATOR_IODEVICE:SLuint32 = 0x00000003;
 pub const SL_IODEVICE_AUDIOINPUT:SLuint32 = 0x00000001;
 pub const SL_DEFAULTDEVICEID_AUDIOINPUT:SLuint32 = 0xFFFFFFFF;
