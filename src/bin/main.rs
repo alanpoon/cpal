@@ -38,9 +38,9 @@ pub const SL_BOOLEAN_FALSE:SLboolean = 0x00000000;
 pub const SL_DATALOCATOR_OUTPUTMIX:SLuint32=0x00000004;
 pub const SL_BYTEORDER_LITTLEENDIAN:SLuint32 = 0x00000002;
 pub const SL_PLAYSTATE_PLAYING:SLuint32 = 0x00000003;
+pub const BUFFER_SIZE_IN_SAMPLES:usize = 256;
 mod app;
 mod assets;
-use std::thread;
 pub fn main() {
      thread::spawn(move || {
             let bqPlayerBufSize =0;
