@@ -188,6 +188,28 @@ fn draw(display: &glium::Display,
     renderer.draw(display, &mut target, &image_map).unwrap();
     target.finish().unwrap();
 }
+pub struct Context{
+    buffer:[[u16;2];512],
+    bqPlayerBufferQueue:SLAndroidSimpleBufferQueueItf,
+    curBuffer:usize,
+    sample_clock:f32,
+    sample_rate:f32,
+    next_value:Box<Fn(&mut f32,f32)->f32>
+}
+
+extern "C" fn bqPlayerCallback2(bq:SLAndroidSimpleBufferQueueItf,context:*mut c_void){
+    let context_struct: &mut Context = unsafe { &mut *(context as *mut Context) };
+    assert_eq!(context_struct.bqPlayerBufferQueue,bq);
+    let mut next_buffer = context_struct.buffer[context_struct.curBuffer.clone()];
+    let next_size = context_struct.buffer[0].len() as u32;
+    let state_ptr: *mut c_void = &mut next_buffer as *mut _ as *mut c_void;
+    unsafe{
+        let result = (**context_struct.bqPlayerBufferQueue).Enqueue.unwrap()(context_struct.bqPlayerBufferQueue,state_ptr, next_size);
+        assert_eq!(result,SL_RESULT_SUCCESS);
+    }
+    context_struct.curBuffer ^= 1;
+    audio_callback(context_struct, BUFFER_SIZE_IN_SAMPLES);
+}
 fn OpenSLWrap_Init(context:&mut Context)->bool{
     let mut engineObject:SLObjectItf = unsafe{mem::zeroed()};
     let mut engineEngine:SLEngineItf= unsafe{mem::zeroed()};    
@@ -274,5 +296,35 @@ fn OpenSLWrap_Init(context:&mut Context)->bool{
         }
         context.curBuffer ^= 1;
         return true;
+    }
+}
+
+fn OpenSLWrap_Shutdown(engineObject:&mut SLObjectItf,engineEngine:&mut SLEngineItf,outputMixObject:&mut SLObjectItf,bqPlayerObject:&mut SLObjectItf,
+bqPlayerPlay:&mut SLPlayItf,bqPlayerVolume:&mut SLVolumeItf,
+bqPlayerMuteSolo:&mut SLMuteSoloItf,
+context:&mut Context){
+    if !bqPlayerObject.is_null(){
+        *bqPlayerObject = ptr::null();
+        *bqPlayerPlay = ptr::null();
+        context.bqPlayerBufferQueue = ptr::null();
+        *bqPlayerMuteSolo = ptr::null();
+        *bqPlayerVolume = ptr::null();
+    }
+    if !outputMixObject.is_null(){
+        *outputMixObject = ptr::null();
+    }
+    if !engineObject.is_null(){
+        *engineObject = ptr::null();
+        *engineEngine = ptr::null();
+    }
+    //I am converting some c++ code to rust. I can certainty use optional value. but I want to know what happens if I equal *bqPlayerObject = stdtr::null()
+}
+fn audio_callback(context_struct:&mut Context, num_samples:usize){
+    let sample_rate = context_struct.sample_rate.clone();
+    for sample in context_struct.buffer[context_struct.curBuffer].chunks_mut(num_samples){
+        let value = (((*context_struct.next_value)(&mut context_struct.sample_clock,sample_rate) * 0.5 + 0.5) * std::u16::MAX as f32) as u16;
+                    for out in sample.iter_mut() {
+                        *out = value;
+                    }
     }
 }
