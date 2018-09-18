@@ -50,13 +50,11 @@ pub fn main() {
             context.sample_rate =200.0;
             context.sample_clock=0.0;
             context.next_value=Box::new(|sample_clock:&mut f32,sample_rate:f32|->f32{
-                println!("next {}",sample_rate);
                 *sample_clock = (*sample_clock + 1.0) % sample_rate;
                 (*sample_clock * 440.0 * 2.0 * 3.141592 / sample_rate).sin()
             });
 
             loop{
-                println!("tt");
                 OpenSLWrap_Init(&mut context);
             }
         });
