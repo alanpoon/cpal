@@ -11,10 +11,8 @@ extern crate gstreamer as gst;
 use gst::prelude::*;
 #[path = "tutorials-common.rs"]
 mod tutorials_common;
-mod app;
-mod assets;
 pub fn main() {
-    
+    tutorials_common::run(tutorial_main);
     let builder = glium::glutin::WindowBuilder::new();
     let context = glium::glutin::ContextBuilder::new()
         .with_gl(glium::glutin::GlRequest::Specific(glium::glutin::Api::OpenGlEs, (3, 0)));
@@ -133,16 +131,6 @@ pub fn main() {
 
         last_update = std::time::Instant::now();
     }
-}
-fn draw(display: &glium::Display,
-        renderer: &mut conrod::backend::glium::Renderer,
-        image_map: &conrod::image::Map<glium::Texture2d>,
-        primitives: &conrod::render::OwnedPrimitives) {
-    renderer.fill(display, primitives.walk(), &image_map);
-    let mut target = display.draw();
-    target.clear_color(1.0, 1.0, 1.0, 1.0);
-    renderer.draw(display, &mut target, &image_map).unwrap();
-    target.finish().unwrap();
 }
 fn tutorial_main() {
     // Initialize GStreamer
