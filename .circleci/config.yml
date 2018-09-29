@@ -33,7 +33,7 @@ jobs:
       - run: cd ..
       - run: pwd
       - run: ls
-      - run: cargo build
+      - run: cargo build --bin main
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
