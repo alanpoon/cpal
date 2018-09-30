@@ -32,15 +32,11 @@ jobs:
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
       - run: mkdir gstreamer
-      - run: cd gstreamer
-      - run: wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
-      - run: ls
-      - run: tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
-      - run: ls
-      - run: cd ..
-      - run: echo 'export GSTREAMER_ROOT_ANDROID=gstream' >> $BASH_ENV
-      - run: pwd
-      - run: ls
+      - run: cd gstreamer && wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
+      - run: cd gstreamer && ls
+      - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
+      - run: cd gstreamer && ls
+      - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
