@@ -33,6 +33,9 @@ jobs:
       - run: cd ..
       - run: mkdir gstreamer
       - run: wget -O /gstreamer "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
+      - run: cd gstreamer
+      - run: ls
+      - run: cd ..
       - run: tar xvjf /gstreamer/gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer
       - run: ls
