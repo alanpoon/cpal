@@ -36,8 +36,10 @@ jobs:
       - run: cd gstreamer && ls
       - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer && ls
-      - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
-      - run: cd ${GSTREAMER_ROOT_ANDROID} && ls
+      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
+      - run: echo 'export GST_PLUGIN_SYSTEM_PATH=/root/project/gstreamer/arm/lib/gstreamer-1.0' >> $BASH_ENV
+      - run: echo 'export PATH=/root/project/gstreamer/arm/bin:${PATH}' >> $BASH_ENV
+      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstreamer/arm/lib:${LD_LIBRARY_PATH}' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
