@@ -24,6 +24,7 @@ jobs:
       - run: rustc --version
       - run: apt-get -qq update
       - run: "apt-get -y install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \   gstreamer1.0-plugins-base gstreamer1.0-plugins-good \    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \     gstreamer1.0-libav libgstrtspserver-1.0-dev libglib2.0-dev"
+      - run: 
       - run: apt-get install python-software-properties software-properties-common -y --fix-missing
       - run: sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
@@ -36,10 +37,14 @@ jobs:
       - run: cd gstreamer && ls
       - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer && ls
-      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
-      - run: echo 'export GST_PLUGIN_SYSTEM_PATH=/root/project/gstreamer/arm/lib/gstreamer-1.0' >> $BASH_ENV
-      - run: echo 'export PATH=/root/project/gstreamer/arm/bin:${PATH}' >> $BASH_ENV
-      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstreamer/arm/lib:${LD_LIBRARY_PATH}' >> $BASH_ENV
+      - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
+      - run: mkdir gstreamer_n
+      - run: cd gstreamer_n && wget https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip
+      - run: apt-get install p7zip-full
+      - run: cd gstreamer_n && 7z x gst-build-armeabi.zip
+      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer_n/pkgconfig' >> $BASH_ENV
+      - run: echo 'export PATH=/root/project/gstreamer_n:${PATH}' >> $BASH_ENV
+      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstreamer_n:${LD_LIBRARY_PATH}' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
