@@ -24,7 +24,6 @@ jobs:
       - run: rustc --version
       - run: apt-get -qq update
       - run: "apt-get -y install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \   gstreamer1.0-plugins-base gstreamer1.0-plugins-good \    gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \     gstreamer1.0-libav libgstrtspserver-1.0-dev libglib2.0-dev"
-      - run: 
       - run: apt-get install python-software-properties software-properties-common -y --fix-missing
       - run: sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
