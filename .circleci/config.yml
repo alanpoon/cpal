@@ -38,8 +38,7 @@ jobs:
       - run: cd gstreamer && ls
       - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
       - run: mkdir gstreamer_n
-      - run: cd gstreamer_n && wget https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip
-      - run: apt-get install p7zip-full
+      - run: cd gstreamer_n && curl -s -H "Accept:application/vnd.github.v3.raw" https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip
       - run: cd gstreamer_n && ls
       - run: cd gstreamer_n && ls && unzip gst-build-armeabi.zip
       - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer_n/pkgconfig' >> $BASH_ENV
