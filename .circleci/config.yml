@@ -37,6 +37,7 @@ jobs:
       - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer && ls
       - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
+       - run: echo 'export PATH=${NDK_HOME}:${PATH}' >> $BASH_ENV
       - run: "chmod +x .circleci/gst_build.sh"
       - run: "./.circleci/gst_build.sh" 
       - run: echo 'export PKG_CONFIG_PATH=/root/project/gstream_out/pkgconfig' >> $BASH_ENV
