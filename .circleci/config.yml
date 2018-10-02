@@ -31,19 +31,17 @@ jobs:
       - run: apt-get install -y clang-6.0
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
-      - run: mkdir gstreamer
+      - run: mkdir gst-build-armeabi
       - run: cd gstreamer && wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
       - run: cd gstreamer && ls
       - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer && ls
       - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
-      - run: mkdir gstreamer_n
-      - run: cd gstreamer_n && curl -s -H "Accept:application/vnd.github.v3.raw" https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip
-      - run: cd gstreamer_n && ls
-      - run: cd gstreamer_n && ls && unzip gst-build-armeabi.zip
-      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer_n/pkgconfig' >> $BASH_ENV
-      - run: echo 'export PATH=/root/project/gstreamer_n:${PATH}' >> $BASH_ENV
-      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstreamer_n:${LD_LIBRARY_PATH}' >> $BASH_ENV
+      - run: "chmod +x .circleci/gst_build.sh"
+      - run: "./.circleci/gst_build.sh" 
+      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstream_out/pkgconfig' >> $BASH_ENV
+      - run: echo 'export PATH=/root/project/gstream_out:${PATH}' >> $BASH_ENV
+      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstream_out:${LD_LIBRARY_PATH}' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
