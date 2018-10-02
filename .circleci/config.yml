@@ -31,7 +31,7 @@ jobs:
       - run: apt-get install -y clang-6.0
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
-      - run: mkdir gst-build-armeabi
+      - run: mkdir gstreamer
       - run: cd gstreamer && wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
       - run: cd gstreamer && ls
       - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
