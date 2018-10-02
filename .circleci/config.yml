@@ -40,6 +40,7 @@ jobs:
       - run: mkdir gstreamer_n
       - run: cd gstreamer_n && wget https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip
       - run: apt-get install p7zip-full
+      - run: cd gstreamer_n && ls
       - run: cd gstreamer_n && ls && 7z e gst-build-armeabi.zip
       - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer_n/pkgconfig' >> $BASH_ENV
       - run: echo 'export PATH=/root/project/gstreamer_n:${PATH}' >> $BASH_ENV
