@@ -1,7 +1,5 @@
 version: 2
-
 jobs:
-
   android-test:
     docker:     
       - 
@@ -33,16 +31,13 @@ jobs:
       - run: cd ..
       - run: mkdir gstreamer
       - run: cd gstreamer && wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
-      - run: cd gstreamer && ls
-      - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
+      #- run: cd gstreamer && ls
+      #- run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: cd gstreamer && ls
       - run: echo 'export GSTREAMER_ROOT_ANDROID=/root/project/gstreamer' >> $BASH_ENV
-      - run: echo 'export PATH=${NDK_HOME}:${PATH}' >> $BASH_ENV
-      - run: "chmod +x .circleci/gst_build.sh"
-      - run: "./.circleci/gst_build.sh" 
-      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstream_out/pkgconfig' >> $BASH_ENV
-      - run: echo 'export PATH=/root/project/gstream_out:${PATH}' >> $BASH_ENV
-      - run: echo 'export LD_LIBRARY_PATH=/root/project/gstream_out:${LD_LIBRARY_PATH}' >> $BASH_ENV
+      - run: echo 'export PATH=/usr/local/gstreamer/android-18/toolchain/arm:${PATH}' >> $BASH_ENV
+      - run: cp .circleci/gst_build_2.sh gstreamer
+      - run: "cd gstreamer && sh gst_build_2.sh ls /usr/local/gstreamer/android-18/toolchain/arm"
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
