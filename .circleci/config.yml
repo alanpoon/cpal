@@ -30,7 +30,7 @@ jobs:
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: cd ..
       - run: mkdir gstreamer
-      - run: cd gstreamer && wget "https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip?raw=true -O lib.zip"
+      - run: cd gstreamer && wget https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip?raw=true -O lib.zip
       - run: cd gstreamer && ls
       - run: cd gstreamer && unzip lib.zip
       #- run: cd gstreamer && wget "https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2"
