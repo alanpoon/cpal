@@ -13,7 +13,7 @@ OUTPUT_DIR="/usr/local/gstreamer/$ANDROID_PLATFORM"
 NDK_TOOLCHAIN_PATH="${OUTPUT_DIR}/toolchain"
 
 # Android NDK standalone-toolchain(ARM)
-ARM_TOOLCHAIN="arm"
+ARM_TOOLCHAIN="arm-linux-androideabi-4.9"
 
 # Android NDK standalone-toolchain(x86)
 X86_TOOLCHAIN="x86-4.9"
