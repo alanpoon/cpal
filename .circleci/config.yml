@@ -32,7 +32,8 @@ jobs:
       #- run: cd gstreamer/gst-build-armeabi && ls
       #- run: echo 'export PATH=/root/project/gstreamer/gst-build-armeabi:${PATH}' >> $BASH_ENV
       #- run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/gst-build-armeabi/pkgconfig' >> $BASH_ENV
-      - run: cd gstreamer && curl -L https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2 | tar xvjf
+      - run: cd gstreamer && curl -L https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2
+      - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       - run: sed -i "s;prefix=/root/gstreamer;prefix=$PWD/gstreamer/arm;g" $PWD/gstreamer/arm/lib/pkgconfig/*.pc 
       - run: echo 'export PKG_CONFIG_PATH=$PWD/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
