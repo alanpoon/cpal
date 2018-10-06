@@ -29,13 +29,16 @@ jobs:
       - run: apt-get install -y clang-6.0
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: mkdir gstreamer
-      #- run: cd gstreamer/gst-build-armeabi && ls
-      #- run: echo 'export PATH=/root/project/gstreamer/gst-build-armeabi:${PATH}' >> $BASH_ENV
-      #- run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/gst-build-armeabi/pkgconfig' >> $BASH_ENV
-      - run: cd gstreamer && wget https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2
-      - run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
-      - run: sed -i "s;prefix=/root/gstreamer;prefix=$PWD/gstreamer/arm;g" $PWD/gstreamer/arm/lib/pkgconfig/*.pc 
-      - run: echo 'export PKG_CONFIG_PATH=$PWD/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
+      - run: cd gstreamer && wget https://github.com/servo/libgstreamer_android_gen/blob/master/out/gst-build-armeabi.zip?raw=true -O lib.zip
+      - run: cd gstreamer && unzip lib.zip
+      - run: cd gstreamer/gst-build-armeabi && ls
+      - run: echo 'export GST_LIB_DIR=/root/project/gstreamer/gst-build-armeabi' >> $BASH_ENV
+      - run: perl -i -pe "s#libdir=.*#libdir=${GST_LIB_DIR}#g" $GST_LIB_DIR/pkgconfig/*
+      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/gst-build-armeabi/pkgconfig' >> $BASH_ENV
+      #- run: cd gstreamer && wget https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2
+      #- run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
+      #- run: sed -i "s;prefix=/root/gstreamer;prefix=$PWD/gstreamer/arm;g" $PWD/gstreamer/arm/lib/pkgconfig/*.pc 
+      #- run: echo 'export PKG_CONFIG_PATH=$PWD/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
       - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
