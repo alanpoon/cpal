@@ -32,10 +32,10 @@ jobs:
       - run: cd gstreamer && wget http://servo-deps.s3.amazonaws.com/gstreamer/gstreamer-armeabi-v7a-1.14.3-20181004-142930.zip -O lib.zip
       - run: cd gstreamer && unzip lib.zip
       - run: cd gstreamer && ls
-      - run: cd gstreamer/gst-build-armeabi && ls
-      - run: echo 'export GST_LIB_DIR=/root/project/gstreamer/gst-build-armeabi' >> $BASH_ENV
+      - run: cd gstreamer/gst-build-armeabi-v7a && ls
+      - run: echo 'export GST_LIB_DIR=/root/project/gstreamer/gst-build-armeabi-v7a' >> $BASH_ENV
       - run: perl -i -pe "s#libdir=.*#libdir=${GST_LIB_DIR}#g" $GST_LIB_DIR/pkgconfig/*
-      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/gst-build-armeabi/pkgconfig' >> $BASH_ENV
+      - run: echo 'export PKG_CONFIG_PATH=/root/project/gstreamer/gst-build-armeabi-v7a/pkgconfig' >> $BASH_ENV
       #- run: cd gstreamer && wget https://gstreamer.freedesktop.org/data/pkg/android/1.14.3/gstreamer-1.0-android-universal-1.14.3.tar.bz2
       #- run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       #- run: sed -i "s;prefix=/root/gstreamer;prefix=$PWD/gstreamer/arm;g" $PWD/gstreamer/arm/lib/pkgconfig/*.pc 
