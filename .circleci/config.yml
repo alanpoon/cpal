@@ -29,7 +29,7 @@ jobs:
       - run: apt-get install -y clang-6.0
       - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: mkdir gstreamer
-      - run: cd gstreamer && wget wget http://servo-deps.s3.amazonaws.com/gstreamer/gstreamer-armeabi-v7a-1.14.3-20181004-142930.zip -O lib.zip
+      - run: cd gstreamer && wget http://servo-deps.s3.amazonaws.com/gstreamer/gstreamer-armeabi-v7a-1.14.3-20181004-142930.zip -O lib.zip
       - run: cd gstreamer && unzip lib.zip
       - run: cd gstreamer/gst-build-armeabi && ls
       - run: echo 'export GST_LIB_DIR=/root/project/gstreamer/gst-build-armeabi' >> $BASH_ENV
