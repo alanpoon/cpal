@@ -31,6 +31,7 @@ jobs:
       - run: mkdir gstreamer
       - run: cd gstreamer && wget http://servo-deps.s3.amazonaws.com/gstreamer/gstreamer-armeabi-v7a-1.14.3-20181004-142930.zip -O lib.zip
       - run: cd gstreamer && unzip lib.zip
+      - run: cd gstreamer && ls
       - run: cd gstreamer/gst-build-armeabi && ls
       - run: echo 'export GST_LIB_DIR=/root/project/gstreamer/gst-build-armeabi' >> $BASH_ENV
       - run: perl -i -pe "s#libdir=.*#libdir=${GST_LIB_DIR}#g" $GST_LIB_DIR/pkgconfig/*
