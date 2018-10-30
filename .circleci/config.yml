@@ -45,7 +45,7 @@ jobs:
       - run: "ls target/android-artifacts/app"
       - run: ls target/android-artifacts/app/lib
       - run: ls target/android-artifacts/app/src
-      
+      - run: zip -r app.zip target/android-artifacts/app
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
       - run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"

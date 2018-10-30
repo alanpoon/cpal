@@ -9,12 +9,10 @@ set -e
 tag=$CIRCLE_TAG
 owner=$CIRCLE_PROJECT_USERNAME
 repo=$CIRCLE_PROJECT_REPONAME
-filename=lib.zip
+filename=.app.zip
 GH_REPO="https://api.github.com/repos/$owner/$repo"
 GH_TAGS="$GH_REPO/releases/latest"
 AUTH="Authorization: token $GITHUB_API_TOKEN"
-
-zip -r $filename ./target/android-artifacts/app
 
 # Validate token.
 curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or network issue!";  exit 1; }
