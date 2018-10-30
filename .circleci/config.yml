@@ -45,6 +45,7 @@ jobs:
       - run: "ls target/android-artifacts/app"
       - run: ls target/android-artifacts/app/lib
       - run: ls target/android-artifacts/app/src
+      - run: apt-get install zip
       - run: zip -r app.zip target/android-artifacts/app
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
