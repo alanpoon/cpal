@@ -45,15 +45,16 @@ jobs:
       - run: "ls target/android-artifacts/app"
       - run: ls target/android-artifacts/app/lib
       - run: ls target/android-artifacts/app/src
-      
+      - run: apt-get install zip
+      - run: zip -r app.zip target/android-artifacts/app
       - run: "ls target/android-artifacts/app/build/outputs/apk"
       - run: "pwd"
       - run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
       - run: "zipalign -f 4 ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk ${HOME}/project/target/android-artifacts/app/build/outputs/apk/outfile.apk"
-      - run: "chmod +x .circleci/upload_github_release.sh"
+      - run: "chmod +x .circleci/upload_github_release.1.sh"
       - 
         run: 
-          command: "./.circleci/upload_github_release.sh"
+          command: "./.circleci/upload_github_release.1.sh"
           name: "Deploy to github"
 workflows:
   version: 2
