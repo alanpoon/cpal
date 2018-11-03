@@ -27,7 +27,6 @@ jobs:
       - run: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
       - run: apt-get -qq update && apt-get install -y git
       - run: apt-get install -y clang-6.0
-      - run: "git clone https://github.com/tomaka/android-rs-glue.git && cd android-rs-glue && git reset --hard 8ad069e3bcad7523b95ed12946725f4bbbb2572e && cargo install --path cargo-apk --force"
       - run: mkdir gstreamer
       - run: cd gstreamer && wget http://servo-deps.s3.amazonaws.com/gstreamer/gstreamer-armeabi-v7a-1.14.3-20181004-142930.zip -O lib.zip
       - run: cd gstreamer && unzip lib.zip
@@ -40,15 +39,10 @@ jobs:
       #- run: cd gstreamer && tar xvjf gstreamer-1.0-android-universal-1.14.3.tar.bz2
       #- run: sed -i "s;prefix=/root/gstreamer;prefix=$PWD/gstreamer/arm;g" $PWD/gstreamer/arm/lib/pkgconfig/*.pc 
       #- run: echo 'export PKG_CONFIG_PATH=$PWD/gstreamer/arm/lib/pkgconfig' >> $BASH_ENV
-      - run: PKG_CONFIG_ALLOW_CROSS=1 cargo apk build --release --verbose
-      - run: "ls target/android-artifacts/app/build/outputs/apk"
-      - run: "ls target/android-artifacts/app"
-      - run: ls target/android-artifacts/app/lib
-      - run: ls target/android-artifacts/app/src
-      - run: apt-get install zip
-      - run: zip -r app.zip target/android-artifacts/app
-      - run: "ls target/android-artifacts/app/build/outputs/apk"
-      - run: "pwd"
+      - run: PKG_CONFIG_ALLOW_CROSS=1 cargo build --target=arm-linux-androideabi --release --verbose
+      - run: "chmod +x .circleci/android_run.sh"
+      - run: "./.circleci/android_run.sh"
+      - run: ls app
       - run: "jarsigner -verbose -sigalg SHA1withRSA -storepass ${KEYPHRASE} -digestalg SHA1 -keystore my-release-key.keystore ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk rustropy"
       - run: "zipalign -f 4 ${HOME}/project/target/android-artifacts/app/build/outputs/apk/app-release-unsigned.apk ${HOME}/project/target/android-artifacts/app/build/outputs/apk/outfile.apk"
       - run: "chmod +x .circleci/upload_github_release.1.sh"
